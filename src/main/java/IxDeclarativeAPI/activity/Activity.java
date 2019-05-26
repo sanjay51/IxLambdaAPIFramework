@@ -1,5 +1,6 @@
 package IxDeclarativeAPI.activity;
 
+import IxDeclarativeAPI.auth.AuthStrategy;
 import IxDeclarativeAPI.exception.InvalidInputException;
 import IxDeclarativeAPI.exception.NotAuthorizedException;
 import IxDeclarativeAPI.request.Request;
@@ -17,8 +18,9 @@ public abstract class Activity {
 
     protected abstract Response enact() throws Exception;
     protected abstract List<Parameter> getParameters();
+    protected abstract List<AuthStrategy> getAuthStrategies();
 
-    public Activity(Request request) {
+    public Activity(final Request request) {
         this.request = request;
     }
 
@@ -32,13 +34,6 @@ public abstract class Activity {
         });
     }
 
-    public Response getResponse() throws Exception {
-        this.initialize();
-        this.validateRequest();
-        this.checkAuth();
-        return this.enact();
-    }
-
     protected void validateRequest() throws InvalidInputException {
         // Validate parameters one by one
         for (final String paramName: this.parameterMap.keySet()) {
@@ -46,15 +41,29 @@ public abstract class Activity {
 
             final ValidationResponse validationResponse = parameter.validate();
             if (! validationResponse.isValid()) {
-                throw new InvalidInputException(validationResponse.getMessage());
+                throw new InvalidInputException("Authentication/authorization failed.");
             }
         }
     }
 
     protected void checkAuth() throws NotAuthorizedException {
+        if (this.getAuthStrategies() == null) return;
 
+        try {
+            this.getAuthStrategies().stream().forEach(authStrategy -> {
+                authStrategy.execute(this.parameterMap);
+            });
+        } catch (final Exception e) {
+            throw new NotAuthorizedException(e.getMessage());
+        }
     }
 
+    public Response getResponse() throws Exception {
+        this.initialize();
+        this.validateRequest();
+        this.checkAuth();
+        return this.enact();
+    }
 
     public Parameter getParameterByName(@NonNull final String name) {
         return this.parameterMap.get(name);

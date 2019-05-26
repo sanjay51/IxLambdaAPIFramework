@@ -30,4 +30,8 @@ public class Parameter<T> {
     public void setValue(Object value) {
         this.value = (T) value;
     }
+
+    public String getStringValue() {
+        return (String) value;
+    }
 }
