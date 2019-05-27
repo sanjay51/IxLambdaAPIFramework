@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'idea'
     id "io.freefair.lombok" version "3.6.4"
+    id 'jacoco'
 }
 
 group 'ixLambdaBackend'
@@ -22,13 +23,24 @@ dependencies {
     )
     compile group: 'org.apache.commons', name: 'commons-csv', version: '1.5'
     compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
-
+    
+    testCompile "org.mockito:mockito-core:1.+"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }
 
 compileJava {
     excludes = ['**/test/*']
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.6
+            }
+        }
+    }
 }
 
 task buildZip(type: Zip) {
@@ -42,3 +54,5 @@ task buildZip(type: Zip) {
 test {
     useJUnitPlatform()
 }
+
+build.dependsOn jacocoTestCoverageVerification

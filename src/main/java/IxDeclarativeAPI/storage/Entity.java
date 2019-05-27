@@ -9,6 +9,6 @@ public interface Entity {
     void read();
     void update(List<Attribute> updatedAttributes);
     void delete();
-    List<Entity> getAll();
+    List<? extends Entity> getAll();
     void validate();
 }
