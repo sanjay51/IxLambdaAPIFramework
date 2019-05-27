@@ -26,14 +26,30 @@ public abstract class DDBEntity implements Entity {
     public abstract Schema getSchema();
     public abstract AmazonDynamoDB getDDB();
 
-    /* CRUD operations */
-    @Override
-    public void create() {
+    public DDBEntity(final String primaryKeyValue) {
+        this.primaryKey = new Attribute(this.getSchema().getPrimaryKeyName(),
+                                        new Value<>(primaryKeyValue),
+                                        new Metadata(Type.PRIMARY_KEY));
 
     }
 
+    public DDBEntity(final String primaryKeyValue, final String sortKeyValue) {
+        this(primaryKeyValue);
+
+        if (this.getSchema().getSortKeyName().isPresent())
+            this.sortKey = new Attribute(this.getSchema().getSortKeyName().get(),
+                                                 new Value<>(sortKeyValue),
+                                                 new Metadata(Type.SORT_KEY));
+    }
+
+    /* CRUD operations */
     @Override
-    public void read() throws EntityNotFoundException, InternalException {
+    public DDBEntity create() {
+        return this;
+    }
+
+    @Override
+    public DDBEntity read() throws EntityNotFoundException, InternalException {
         // read
         final Map<String, AttributeValue> response = DDBReadStrategy.execute(this.primaryKey,
                 this.sortKey, this.getSchema().getTableName(), this.getDDB());
@@ -48,11 +64,13 @@ public abstract class DDBEntity implements Entity {
             final Attribute attribute = new Attribute(attributeName, new Value(value.getS()), new Metadata(Type.REGULAR));
             this.payload.put(attributeName, attribute);
         }
+
+        return this;
     }
 
     @Override
-    public void update(final List<Attribute> updatedAttributes) {
-
+    public DDBEntity update(final List<Attribute> updatedAttributes) {
+        return this;
     }
 
     @Override
@@ -70,5 +88,17 @@ public abstract class DDBEntity implements Entity {
     @Override
     public void validate() {
 
+    }
+
+    public Map<String, Object> getAsKeyValueObject() {
+        final Map<String, Object> entity = new HashMap<>();
+        entity.put(this.primaryKey.getName(), this.primaryKey.getValue().getValue());
+        if (this.sortKey != null) entity.put(this.sortKey.getName(), this.sortKey.getValue().getValue());
+
+        for (final Map.Entry<String, Attribute> attribute: this.payload.entrySet()) {
+            entity.put(attribute.getKey(), attribute.getValue().getValue().getValue());
+        }
+
+        return entity;
     }
 }

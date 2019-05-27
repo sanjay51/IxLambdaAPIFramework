@@ -40,7 +40,7 @@ public abstract class Activity {
 
             final ValidationResponse validationResponse = parameter.validate();
             if (! validationResponse.isValid()) {
-                throw new InvalidInputException("Authentication/authorization failed.");
+                throw new InvalidInputException("Input validation failed.");
             }
         }
     }
