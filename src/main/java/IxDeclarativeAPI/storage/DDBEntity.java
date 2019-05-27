@@ -1,12 +1,15 @@
 package IxDeclarativeAPI.storage;
 
+import IxDeclarativeAPI.exception.EntityNotFoundException;
+import IxDeclarativeAPI.exception.InternalException;
 import IxDeclarativeAPI.storage.attribute.Attribute;
 import IxDeclarativeAPI.storage.attribute.Metadata;
 import IxDeclarativeAPI.storage.attribute.Type;
 import IxDeclarativeAPI.storage.attribute.Value;
+import IxDeclarativeAPI.storage.ddb.DDBReadStrategy;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -18,7 +21,7 @@ import java.util.Map;
 public abstract class DDBEntity implements Entity {
     @Setter private Attribute primaryKey;
     @Setter private Attribute sortKey;
-    @Setter private final Map<String, Attribute> payload = new HashMap<>();
+    @Setter @Getter private Map<String, Attribute> payload = new HashMap<>();
 
     public abstract Schema getSchema();
     public abstract AmazonDynamoDB getDDB();
@@ -30,28 +33,19 @@ public abstract class DDBEntity implements Entity {
     }
 
     @Override
-    public void read() {
-        final Map<String, AttributeValue> key = new HashMap<>();
-        key.put(this.primaryKey.getName(), new AttributeValue(this.primaryKey.getStringValue()));
+    public void read() throws EntityNotFoundException, InternalException {
+        // read
+        final Map<String, AttributeValue> response = DDBReadStrategy.execute(this.primaryKey,
+                this.sortKey, this.getSchema().getTableName(), this.getDDB());
 
-        if (this.sortKey != null)
-            key.put(this.sortKey.getName(), new AttributeValue(this.sortKey.getStringValue()));
-
-        final GetItemRequest request = new GetItemRequest()
-                .withKey(key)
-                .withTableName(this.getSchema().getTableName());
-
-        final Map<String, AttributeValue> response = this.getDDB().getItem(request).getItem();
-
+        // populate
         for (final Map.Entry<String, Type> attributeTypeEntry: this.getSchema().getAttributeTypeMap().entrySet()) {
             if (attributeTypeEntry.getValue() != Type.REGULAR) continue;
 
             final String attributeName = attributeTypeEntry.getKey();
 
             final AttributeValue value = response.get(attributeName);
-            final Attribute attribute = new Attribute(attributeName,
-                                                new Value(value.getS()),
-                                                new Metadata(Type.REGULAR));
+            final Attribute attribute = new Attribute(attributeName, new Value(value.getS()), new Metadata(Type.REGULAR));
             this.payload.put(attributeName, attribute);
         }
     }
