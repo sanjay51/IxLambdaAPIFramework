@@ -19,6 +19,8 @@ import java.util.Map;
 public class TestData {
     public static final String API_getUserById = "GetUserById";
     public static final String PARAM_userId = "userId";
+    public static final String PARAM_requesterId = "requesterId";
+    public static final String PARAM_requesterAccessLevel = "requesterAccessLevel";
     public static final String PARAM_authToken = "authToken";
     public static final Request sampleGetUserByIdRequest = getSampleRequest();
     public static final AuthenticationContext authenticationContext =
@@ -47,7 +49,7 @@ public class TestData {
     static final class SampleGetUserByIdActivity extends Activity {
         public List<AuthStrategy> authStrategies = new ArrayList<>();
 
-        public SampleGetUserByIdActivity(Request request) {
+        public SampleGetUserByIdActivity(final Request request) {
             super(request);
         }
 
@@ -65,7 +67,7 @@ public class TestData {
         }
 
         @Override
-        protected List<AuthStrategy> getAuthStrategies() {
+        public List<AuthStrategy> getAuthStrategies() {
             return authStrategies;
         }
     }

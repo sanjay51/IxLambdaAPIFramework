@@ -18,20 +18,28 @@ public class Parameter<T> {
     }
 
     public ValidationResponse validate() {
-        for (final ParamValidator validator: this.validators) {
-            final ValidationResponse response = validator.isValid(this);
 
-            if (!response.isValid()) return response;
+        if (this.validators != null) {
+            for (final ParamValidator validator : this.validators) {
+                final ValidationResponse response = validator.isValid(this);
+
+                if (!response.isValid()) return response;
+            }
         }
 
         return new ValidationResponse(true, "");
     }
 
-    public void setValue(Object value) {
+    public Parameter<T> withValue(Object value) {
         this.value = (T) value;
+        return this;
     }
 
     public String getStringValue() {
         return (String) value;
+    }
+
+    public int getIntValue() {
+        return (Integer) value;
     }
 }

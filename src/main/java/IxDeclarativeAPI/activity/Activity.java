@@ -14,22 +14,21 @@ import java.util.Map;
 
 public abstract class Activity {
     final Request request;
-    private Map<String, Parameter> parameterMap = null;
+    private Map<String, Parameter> parameterMap = new HashMap<>();
 
     protected abstract Response enact() throws Exception;
     protected abstract List<Parameter> getParameters();
-    protected abstract List<AuthStrategy> getAuthStrategies();
+    public abstract List<AuthStrategy> getAuthStrategies();
 
     public Activity(final Request request) {
         this.request = request;
     }
 
     private void initialize() {
-        this.parameterMap = new HashMap<>();
         final Map<String, String> queryParams = this.request.getParams().getQuerystring();
 
         this.getParameters().stream().forEach(parameter -> {
-            parameter.setValue(queryParams.get(parameter.getName()));
+            parameter.withValue(queryParams.get(parameter.getName()));
             this.parameterMap.put(parameter.getName(), parameter);
         });
     }
@@ -67,5 +66,9 @@ public abstract class Activity {
 
     public Parameter getParameterByName(@NonNull final String name) {
         return this.parameterMap.get(name);
+    }
+
+    public void addParameter(final Parameter parameter) {
+        this.parameterMap.put(parameter.getName(), parameter);
     }
 }
