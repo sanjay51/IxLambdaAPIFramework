@@ -5,7 +5,7 @@ plugins {
     id 'jacoco'
 }
 
-group 'ixLambdaBackend'
+group 'IxLambdaBackend'
 version '1.0'
 
 sourceCompatibility = 1.8
