@@ -4,5 +4,5 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class Metadata {
-    final Type type;
+    final AttributeType type;
 }

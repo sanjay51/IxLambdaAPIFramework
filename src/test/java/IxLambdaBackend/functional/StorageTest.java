@@ -3,11 +3,13 @@ package IxLambdaBackend.functional;
 import IxLambdaBackend.exception.EntityNotFoundException;
 import IxLambdaBackend.exception.InternalException;
 import IxLambdaBackend.storage.DDBEntity;
-import IxLambdaBackend.storage.Schema;
+import IxLambdaBackend.storage.attribute.value.ValueType;
+import IxLambdaBackend.storage.schema.Schema;
 import IxLambdaBackend.storage.attribute.Attribute;
 import IxLambdaBackend.storage.attribute.Metadata;
-import IxLambdaBackend.storage.attribute.Type;
-import IxLambdaBackend.storage.attribute.Value;
+import IxLambdaBackend.storage.attribute.value.StringValue;
+import IxLambdaBackend.storage.attribute.AttributeType;
+import IxLambdaBackend.storage.schema.Types;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.GetItemResult;
@@ -48,8 +50,8 @@ public class StorageTest {
         doReturn(result).when(mockDDB).getItem(any());
 
         final Attribute primaryKey = new Attribute("email",
-                new Value<>("x@y.com"),
-                new Metadata(Type.PRIMARY_KEY));
+                new StringValue("x@y.com"),
+                new Metadata(AttributeType.PRIMARY_KEY));
 
         final UserEntity userEntity = new UserEntity(primaryKey, null);
 
@@ -63,8 +65,8 @@ public class StorageTest {
         doThrow(new InternalServerErrorException("internal exception")).when(mockDDB).getItem(any());
 
         final Attribute primaryKey = new Attribute("email",
-                new Value<>("x@y.com"),
-                new Metadata(Type.PRIMARY_KEY));
+                new StringValue("x@y.com"),
+                new Metadata(AttributeType.PRIMARY_KEY));
 
         final UserEntity userEntity = new UserEntity(primaryKey, null);
 
@@ -76,8 +78,8 @@ public class StorageTest {
         when(mockDDB.getItem(any())).thenThrow(new ResourceNotFoundException("not found"));
 
         final Attribute primaryKey = new Attribute("email",
-                new Value<>("x@y.com"),
-                new Metadata(Type.PRIMARY_KEY));
+                new StringValue("x@y.com"),
+                new Metadata(AttributeType.PRIMARY_KEY));
 
         final UserEntity userEntity = new UserEntity(primaryKey, null);
 
@@ -95,10 +97,10 @@ public class StorageTest {
         @Override
         public Schema getSchema() {
             if (this.schema == null) {
-                final Map<String, Type> attributeTypeMap = new HashMap<String, Type>() {{
-                    put("email", Type.PRIMARY_KEY);
-                    put("address", Type.REGULAR);
-                    put("name", Type.REGULAR);
+                final Map<String, Types> attributeTypeMap = new HashMap<String, Types>() {{
+                    put("email", new Types(AttributeType.PRIMARY_KEY, ValueType.STRING));
+                    put("address", new Types(AttributeType.REGULAR, ValueType.STRING));
+                    put("name", new Types(AttributeType.REGULAR, ValueType.STRING));
                 }};
 
                 this.schema = new Schema("users", attributeTypeMap);

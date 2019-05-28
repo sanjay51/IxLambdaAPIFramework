@@ -1,5 +1,5 @@
 package IxLambdaBackend.storage.attribute;
 
-public enum Type {
+public enum AttributeType {
     PRIMARY_KEY, SORT_KEY, REGULAR
 }

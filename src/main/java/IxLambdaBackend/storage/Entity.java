@@ -1,5 +1,6 @@
 package IxLambdaBackend.storage;
 
+import IxLambdaBackend.exception.EntityAlreadyExistException;
 import IxLambdaBackend.exception.EntityNotFoundException;
 import IxLambdaBackend.exception.InternalException;
 import IxLambdaBackend.storage.attribute.Attribute;
@@ -7,7 +8,7 @@ import IxLambdaBackend.storage.attribute.Attribute;
 import java.util.List;
 
 public interface Entity {
-    Entity create() throws InternalException;
+    Entity create() throws InternalException, EntityAlreadyExistException;
     Entity read() throws EntityNotFoundException, InternalException;
     Entity update(List<Attribute> updatedAttributes) throws EntityNotFoundException, InternalException;
     void delete() throws InternalException;

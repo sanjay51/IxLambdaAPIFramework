@@ -17,10 +17,10 @@ public class DDBReadStrategy {
                                                       final String tableName,
                                                       final AmazonDynamoDB ddb) throws EntityNotFoundException, InternalException {
         final Map<String, AttributeValue> key = new HashMap<>();
-        key.put(primaryKey.getName(), new AttributeValue(primaryKey.getStringValue()));
+        key.put(primaryKey.getName(), primaryKey.getDynamoDBAttributeValue());
 
         if (sortKey != null)
-            key.put(sortKey.getName(), new AttributeValue(sortKey.getStringValue()));
+            key.put(sortKey.getName(), sortKey.getDynamoDBAttributeValue());
 
         final GetItemRequest request = new GetItemRequest()
                 .withKey(key)
@@ -31,8 +31,8 @@ public class DDBReadStrategy {
         try {
             response = ddb.getItem(request).getItem();
         } catch (final ResourceNotFoundException e) {
-            String message = "Entity not found with id: " + primaryKey.getStringValue();
-            if (sortKey != null) message += ":" + sortKey.getStringValue();
+            String message = "Entity not found with id " + primaryKey.getDynamoDBAttributeValue();
+            if (sortKey != null) message += "; " + sortKey.getDynamoDBAttributeValue();
 
             throw new EntityNotFoundException(message);
         } catch (final Throwable e) {
