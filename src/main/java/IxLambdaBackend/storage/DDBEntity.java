@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class DDBEntity implements Entity {
+public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     @Setter private Attribute primaryKey;
     @Setter private Attribute sortKey;
     @Setter @Getter private Map<String, Attribute> payload = new HashMap<>();
@@ -57,13 +57,13 @@ public abstract class DDBEntity implements Entity {
 
     /* CRUD operations */
     @Override
-    public DDBEntity create() throws EntityAlreadyExistException, InternalException {
+    public T create() throws EntityAlreadyExistException, InternalException {
         DDBCreateStrategy.execute(this.primaryKey, this.sortKey, this.payload, this.getSchema(), this.getDDB());
-        return this;
+        return (T) this;
     }
 
     @Override
-    public DDBEntity read() throws EntityNotFoundException, InternalException {
+    public T read() throws EntityNotFoundException, InternalException {
         // read
         final Map<String, AttributeValue> response = DDBReadStrategy.execute(this.primaryKey,
                 this.sortKey, this.getSchema().getTableName(), this.getDDB());
@@ -82,12 +82,12 @@ public abstract class DDBEntity implements Entity {
             this.payload.put(attributeName, attribute);
         }
 
-        return this;
+        return (T) this;
     }
 
     @Override
-    public DDBEntity update(final List<Attribute> updatedAttributes) {
-        return this;
+    public T update(final List<Attribute> updatedAttributes) {
+        return (T) this;
     }
 
     @Override
@@ -97,7 +97,7 @@ public abstract class DDBEntity implements Entity {
 
     /* List operations */
     @Override
-    public List<? extends DDBEntity> getAll() {
+    public List<T> getAll() {
         return null;
     }
 

@@ -7,11 +7,11 @@ import IxLambdaBackend.storage.attribute.Attribute;
 
 import java.util.List;
 
-public interface Entity {
-    Entity create() throws InternalException, EntityAlreadyExistException;
-    Entity read() throws EntityNotFoundException, InternalException;
-    Entity update(List<Attribute> updatedAttributes) throws EntityNotFoundException, InternalException;
+public interface Entity<T extends Entity<T>> {
+    T create() throws InternalException, EntityAlreadyExistException;
+    T read() throws EntityNotFoundException, InternalException;
+    T update(List<Attribute> updatedAttributes) throws EntityNotFoundException, InternalException;
     void delete() throws InternalException;
-    List<? extends Entity> getAll() throws InternalException;
+    List<T> getAll() throws InternalException;
     void validate();
 }

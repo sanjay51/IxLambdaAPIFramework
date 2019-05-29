@@ -71,7 +71,7 @@ public class ReadTest {
         assertThrows(EntityNotFoundException.class, () -> userEntity.read());
     }
 
-    static class UserEntity extends DDBEntity {
+    static class UserEntity extends DDBEntity<UserEntity> {
         private Schema schema;
 
         public UserEntity(final String primaryKeyValue) {
