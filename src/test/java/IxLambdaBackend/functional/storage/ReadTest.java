@@ -1,14 +1,11 @@
-package IxLambdaBackend.functional;
+package IxLambdaBackend.functional.storage;
 
 import IxLambdaBackend.exception.EntityNotFoundException;
 import IxLambdaBackend.exception.InternalException;
 import IxLambdaBackend.storage.DDBEntity;
+import IxLambdaBackend.storage.attribute.AttributeType;
 import IxLambdaBackend.storage.attribute.value.ValueType;
 import IxLambdaBackend.storage.schema.Schema;
-import IxLambdaBackend.storage.attribute.Attribute;
-import IxLambdaBackend.storage.attribute.Metadata;
-import IxLambdaBackend.storage.attribute.value.StringValue;
-import IxLambdaBackend.storage.attribute.AttributeType;
 import IxLambdaBackend.storage.schema.Types;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
@@ -31,7 +28,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class StorageTest {
+public class ReadTest {
     final GetItemResult result = new GetItemResult();
     static final AmazonDynamoDB mockDDB = Mockito.mock(AmazonDynamoDB.class);
 
@@ -49,11 +46,7 @@ public class StorageTest {
     public void testRead() throws Exception {
         doReturn(result).when(mockDDB).getItem(any());
 
-        final Attribute primaryKey = new Attribute("email",
-                new StringValue("x@y.com"),
-                new Metadata(AttributeType.PRIMARY_KEY));
-
-        final UserEntity userEntity = new UserEntity(primaryKey, null);
+        final UserEntity userEntity = new UserEntity("x@y.com");
 
         userEntity.read();
         assertEquals(userEntity.getPayload().get("name").getStringValue(), "sanjay");
@@ -64,11 +57,7 @@ public class StorageTest {
     public void testReadExceptionCastToInternal() {
         doThrow(new InternalServerErrorException("internal exception")).when(mockDDB).getItem(any());
 
-        final Attribute primaryKey = new Attribute("email",
-                new StringValue("x@y.com"),
-                new Metadata(AttributeType.PRIMARY_KEY));
-
-        final UserEntity userEntity = new UserEntity(primaryKey, null);
+        final UserEntity userEntity = new UserEntity("x@y.com");
 
         assertThrows(InternalException.class, () -> userEntity.read());
     }
@@ -77,11 +66,7 @@ public class StorageTest {
     public void testResourceNotFoundExceptionCastToEntityNotFound() {
         when(mockDDB.getItem(any())).thenThrow(new ResourceNotFoundException("not found"));
 
-        final Attribute primaryKey = new Attribute("email",
-                new StringValue("x@y.com"),
-                new Metadata(AttributeType.PRIMARY_KEY));
-
-        final UserEntity userEntity = new UserEntity(primaryKey, null);
+        final UserEntity userEntity = new UserEntity("x@y.com");
 
         assertThrows(EntityNotFoundException.class, () -> userEntity.read());
     }
@@ -89,9 +74,8 @@ public class StorageTest {
     static class UserEntity extends DDBEntity {
         private Schema schema;
 
-        public UserEntity(final Attribute primaryKey, final Attribute sortKey) {
-            this.setPrimaryKey(primaryKey);
-            this.setSortKey(sortKey);
+        public UserEntity(final String primaryKeyValue) {
+            super(primaryKeyValue);
         }
 
         @Override
