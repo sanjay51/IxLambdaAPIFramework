@@ -72,25 +72,20 @@ public class ReadTest {
     }
 
     static class UserEntity extends DDBEntity<UserEntity> {
-        private Schema schema;
 
         public UserEntity(final String primaryKeyValue) {
             super(primaryKeyValue);
         }
 
         @Override
-        public Schema getSchema() {
-            if (this.schema == null) {
-                final Map<String, Types> attributeTypeMap = new HashMap<String, Types>() {{
-                    put("email", new Types(AttributeType.PRIMARY_KEY, ValueType.STRING));
-                    put("address", new Types(AttributeType.REGULAR, ValueType.STRING));
-                    put("name", new Types(AttributeType.REGULAR, ValueType.STRING));
-                }};
+        public Schema createSchema() {
+            final Map<String, Types> attributeTypeMap = new HashMap<String, Types>() {{
+                put("email", new Types(AttributeType.PRIMARY_KEY, ValueType.STRING));
+                put("address", new Types(AttributeType.REGULAR, ValueType.STRING));
+                put("name", new Types(AttributeType.REGULAR, ValueType.STRING));
+            }};
 
-                this.schema = new Schema("users", attributeTypeMap);
-            }
-
-            return this.schema;
+            return new Schema("users", attributeTypeMap);
         }
 
         @Override

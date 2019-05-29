@@ -26,9 +26,11 @@ import java.util.Map;
 public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     @Setter private Attribute primaryKey;
     @Setter private Attribute sortKey;
+
+    private Schema schema;
     @Setter @Getter private Map<String, Attribute> payload = new HashMap<>();
 
-    public abstract Schema getSchema();
+    public abstract Schema createSchema();
     public abstract AmazonDynamoDB getDDB();
 
     /* Constructors */
@@ -117,5 +119,11 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
         }
 
         return entity;
+    }
+
+    public Schema getSchema() {
+        if (this.schema == null) this.schema = createSchema();
+
+        return this.schema;
     }
 }

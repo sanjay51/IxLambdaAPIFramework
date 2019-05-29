@@ -63,7 +63,7 @@ class CreateTest {
         }
 
         @Override
-        public Schema getSchema() {
+        public Schema createSchema() {
             final Map<String, Types> attributeTypesMap = new HashMap<String, Types>() {{
                 put("userId", new Types(AttributeType.PRIMARY_KEY, ValueType.STRING));
                 put("email", new Types(AttributeType.REGULAR, ValueType.STRING));
