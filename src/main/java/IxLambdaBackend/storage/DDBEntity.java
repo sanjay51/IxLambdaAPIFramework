@@ -11,6 +11,7 @@ import IxLambdaBackend.storage.attribute.value.StringValue;
 import IxLambdaBackend.storage.attribute.value.Value;
 import IxLambdaBackend.storage.attribute.value.ValueType;
 import IxLambdaBackend.storage.ddb.DDBCreateStrategy;
+import IxLambdaBackend.storage.ddb.DDBDeleteStrategy;
 import IxLambdaBackend.storage.ddb.DDBReadStrategy;
 import IxLambdaBackend.storage.schema.Schema;
 import IxLambdaBackend.storage.schema.Types;
@@ -93,8 +94,8 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     }
 
     @Override
-    public void delete() {
-
+    public void delete() throws InternalException {
+        DDBDeleteStrategy.execute(this.primaryKey, this.sortKey, this.getSchema().getTableName(), this.getDDB());
     }
 
     /* List operations */
