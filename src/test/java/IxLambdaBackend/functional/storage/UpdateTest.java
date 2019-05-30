@@ -1,9 +1,13 @@
 package IxLambdaBackend.functional.storage;
 
-import IxLambdaBackend.exception.EntityAlreadyExistsException;
+import IxLambdaBackend.exception.EntityNotFoundException;
 import IxLambdaBackend.exception.InternalException;
+import IxLambdaBackend.exception.InvalidInputException;
 import IxLambdaBackend.storage.DDBEntity;
+import IxLambdaBackend.storage.attribute.Attribute;
 import IxLambdaBackend.storage.attribute.AttributeType;
+import IxLambdaBackend.storage.attribute.Metadata;
+import IxLambdaBackend.storage.attribute.value.StringValue;
 import IxLambdaBackend.storage.attribute.value.ValueType;
 import IxLambdaBackend.storage.schema.Schema;
 import IxLambdaBackend.storage.schema.Types;
@@ -18,13 +22,14 @@ import org.junit.jupiter.api.TestInstance;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CreateTest {
+class UpdateTest {
     private AmazonDynamoDB mockDDB;
 
     @BeforeAll
@@ -37,7 +42,9 @@ class CreateTest {
         doReturn(null).when(mockDDB).putItem(any());
 
         final UserEntity entity = new UserEntity("sanjay");
-        Assertions.assertDoesNotThrow(() -> entity.create());
+        entity.setAttributeValue("email",
+                new Attribute("email", new StringValue("asdf"), new Metadata(AttributeType.REGULAR)));
+        Assertions.assertDoesNotThrow(() -> entity.update());
     }
 
     @Test
@@ -45,7 +52,7 @@ class CreateTest {
         doThrow(ConditionalCheckFailedException.class).when(mockDDB).putItem(any());
 
         final UserEntity entity = new UserEntity("sanjay");
-        Assertions.assertThrows(EntityAlreadyExistsException.class,() -> entity.create());
+        assertThrows(EntityNotFoundException.class,() -> entity.update());
     }
 
     @Test
@@ -53,11 +60,19 @@ class CreateTest {
         doThrow(InternalServerErrorException.class).when(mockDDB).putItem(any());
 
         final UserEntity entity = new UserEntity("sanjay");
-        Assertions.assertThrows(InternalException.class,() -> entity.create());
+        assertThrows(InternalException.class,() -> entity.update());
+    }
+
+    @Test
+    void assertInvalidInputExceptionIfAttributeNotInSchema() {
+        final UserEntity entity = new UserEntity("sanjay");
+        final Attribute badAttribute =
+                new Attribute("email", new StringValue("asdf"), new Metadata(AttributeType.REGULAR));
+        assertThrows(InvalidInputException.class, () ->
+                entity.setAttributeValue("badAttribute", badAttribute));
     }
 
     class UserEntity extends DDBEntity {
-
         public UserEntity(final String primaryKeyValue) {
             super(primaryKeyValue);
         }

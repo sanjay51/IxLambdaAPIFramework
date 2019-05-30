@@ -1,6 +1,6 @@
 package IxLambdaBackend.storage.ddb;
 
-import IxLambdaBackend.exception.EntityAlreadyExistsException;
+import IxLambdaBackend.exception.EntityNotFoundException;
 import IxLambdaBackend.exception.InternalException;
 import IxLambdaBackend.storage.attribute.Attribute;
 import IxLambdaBackend.storage.schema.Schema;
@@ -12,12 +12,12 @@ import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DDBCreateStrategy {
+public class DDBUpdateStrategy {
     public static void execute(final Attribute primaryKey,
-                                                      final Attribute sortKey,
-                                                      final Map<String, Attribute> payload,
-                                                      final Schema schema,
-                                                      final AmazonDynamoDB ddb) throws EntityAlreadyExistsException, InternalException {
+                               final Attribute sortKey,
+                               final Map<String, Attribute> payload,
+                               final Schema schema,
+                               final AmazonDynamoDB ddb) throws EntityNotFoundException, InternalException {
         final Map<String, AttributeValue> item = new HashMap<>();
         item.put(primaryKey.getName(), primaryKey.getDynamoDBAttributeValue());
         if (sortKey != null) item.put(sortKey.getName(), sortKey.getDynamoDBAttributeValue());
@@ -26,9 +26,9 @@ public class DDBCreateStrategy {
             item.put(attribute.getKey(), attribute.getValue().getDynamoDBAttributeValue());
         }
 
-        // DO NOT OVERWRITE
-        String putCondition = String.format("attribute_not_exists(%s)", primaryKey.getName());
-        if (sortKey != null) putCondition += String.format(" AND attribute_not_exists(%s)", sortKey.getName());
+        // OVERWRITE ONLY
+        String putCondition = String.format("attribute_exists(%s)", primaryKey.getName());
+        if (sortKey != null) putCondition += String.format(" AND attribute_exists(%s)", sortKey.getName());
 
         final PutItemRequest request = new PutItemRequest()
                 .withTableName(schema.getTableName())
@@ -40,7 +40,7 @@ public class DDBCreateStrategy {
         } catch (ConditionalCheckFailedException e) {
             // TODO: log for monitoring
             System.out.println("Entity already exists: " + e);
-            throw new EntityAlreadyExistsException("Already exists");
+            throw new EntityNotFoundException("Already exists");
         } catch (final Throwable e) {
             // TODO: log for monitoring
             System.out.println("[ERROR]" + e);

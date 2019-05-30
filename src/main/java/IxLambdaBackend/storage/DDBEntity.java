@@ -1,8 +1,9 @@
 package IxLambdaBackend.storage;
 
-import IxLambdaBackend.exception.EntityAlreadyExistException;
+import IxLambdaBackend.exception.EntityAlreadyExistsException;
 import IxLambdaBackend.exception.EntityNotFoundException;
 import IxLambdaBackend.exception.InternalException;
+import IxLambdaBackend.exception.InvalidInputException;
 import IxLambdaBackend.storage.attribute.Attribute;
 import IxLambdaBackend.storage.attribute.AttributeType;
 import IxLambdaBackend.storage.attribute.Metadata;
@@ -13,6 +14,7 @@ import IxLambdaBackend.storage.attribute.value.ValueType;
 import IxLambdaBackend.storage.ddb.DDBCreateStrategy;
 import IxLambdaBackend.storage.ddb.DDBDeleteStrategy;
 import IxLambdaBackend.storage.ddb.DDBReadStrategy;
+import IxLambdaBackend.storage.ddb.DDBUpdateStrategy;
 import IxLambdaBackend.storage.schema.Schema;
 import IxLambdaBackend.storage.schema.Types;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -60,7 +62,7 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
 
     /* CRUD operations */
     @Override
-    public T create() throws EntityAlreadyExistException, InternalException {
+    public T create() throws EntityAlreadyExistsException, InternalException {
         DDBCreateStrategy.execute(this.primaryKey, this.sortKey, this.payload, this.getSchema(), this.getDDB());
         return (T) this;
     }
@@ -89,7 +91,8 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     }
 
     @Override
-    public T update(final List<Attribute> updatedAttributes) {
+    public T update() throws EntityNotFoundException, InternalException {
+        DDBUpdateStrategy.execute(this.primaryKey, this.sortKey, this.payload, this.getSchema(), this.getDDB());
         return (T) this;
     }
 
@@ -126,5 +129,15 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
         if (this.schema == null) this.schema = createSchema();
 
         return this.schema;
+    }
+
+    public void setAttributeValue(final String attributeName, final Attribute attribute) {
+        if (this.primaryKey.getName().equals(attributeName))
+            this.primaryKey = attribute;
+        else if (this.sortKey != null && this.sortKey.getName().equals(attributeName))
+            this.sortKey = attribute;
+        else if (this.schema.getAttributeTypesMap().containsKey(attributeName))
+            this.payload.put(attributeName, attribute);
+        else throw new InvalidInputException("Attribute not in schema: " + attributeName);
     }
 }
