@@ -140,4 +140,8 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
             this.payload.put(attributeName, attribute);
         else throw new InvalidInputException("Attribute not in schema: " + attributeName);
     }
+
+    public void clear() {
+        this.payload = new HashMap<>();
+    }
 }

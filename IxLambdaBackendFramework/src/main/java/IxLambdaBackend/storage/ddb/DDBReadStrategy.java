@@ -41,6 +41,8 @@ public class DDBReadStrategy {
             throw new InternalException("An internal exception occurred. Please try again.");
         }
 
+        if (response == null) throw new EntityNotFoundException("Not found");
+
         return response;
     }
 }
