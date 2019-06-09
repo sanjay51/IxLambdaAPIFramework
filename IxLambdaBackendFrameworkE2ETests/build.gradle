@@ -3,22 +3,24 @@ plugins {
     id 'idea'
 }
 
-group 'IxLambdaAPIFrameworkTests'
-version '1.0-SNAPSHOT'
+group 'IxLambdaBackendFramework'
+version '1.0'
 
 sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
     flatDir {
-        dirs '/personal-workspace/DeclarativeAPILib/IxLambdaBackendFramework/build/libs'
+        dirs '/personal-workspace/DeclarativeAPILib/IxLambdaAPIFramework/build/libs'
+        dirs '/personal-workspace/DeclarativeAPILib/IxLambdaStorageLib/build/libs'
     }
 }
 
 
 dependencies {
     compile (
-            'IxLambdaBackend:IxLambdaBackend:1.0',
+            'IxLambdaBackendFramework:IxLambdaAPIFramework:1.0',
+            'IxLambdaBackendFramework:IxLambdaStorageLib:1.0',
             'com.amazonaws:aws-lambda-java-core:1.2.0',
             'com.amazonaws:aws-lambda-java-events:1.2.0',
             'com.amazonaws:aws-java-sdk-athena:1.11.405',

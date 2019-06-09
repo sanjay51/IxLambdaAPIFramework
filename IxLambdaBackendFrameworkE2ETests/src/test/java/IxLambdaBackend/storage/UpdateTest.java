@@ -1,34 +1,16 @@
 package IxLambdaBackend.storage;
 
 import IxLambdaBackend.UserEntity;
-import IxLambdaBackend.exception.EntityNotFoundException;
-import IxLambdaBackend.exception.InternalException;
-import IxLambdaBackend.exception.InvalidInputException;
 import IxLambdaBackend.storage.attribute.Attribute;
 import IxLambdaBackend.storage.attribute.AttributeType;
 import IxLambdaBackend.storage.attribute.Metadata;
 import IxLambdaBackend.storage.attribute.value.StringValue;
-import IxLambdaBackend.storage.attribute.value.ValueType;
-import IxLambdaBackend.storage.schema.Schema;
-import IxLambdaBackend.storage.schema.Types;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
-import com.amazonaws.services.dynamodbv2.model.InternalServerErrorException;
-import org.junit.jupiter.api.Assertions;
+import IxLambdaBackend.storage.exception.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UpdateTest {

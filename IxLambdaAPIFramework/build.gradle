@@ -1,0 +1,62 @@
+plugins {
+    id 'java'
+    id 'idea'
+    id 'jacoco'
+}
+
+group 'IxLambdaBackendFramework'
+version '1.0'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs '/personal-workspace/DeclarativeAPILib/IxLambdaStorageLib/build/libs'
+    }
+}
+
+dependencies {
+    compile (
+            'com.auth0:java-jwt:3.4.0',
+            'IxLambdaBackendFramework:IxLambdaStorageLib:1.0',
+    )
+    compile group: 'org.apache.commons', name: 'commons-csv', version: '1.5'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+
+    compileOnly('org.projectlombok:lombok:1.18.8')
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    
+    testCompile "org.mockito:mockito-core:1.+"
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+}
+
+compileJava {
+    excludes = ['**/test/*']
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.65
+            }
+        }
+    }
+}
+
+task buildZip(type: Zip) {
+    from compileJava
+    from processResources
+    into('lib') {
+        from configurations.runtime
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+build.dependsOn jacocoTestCoverageVerification
