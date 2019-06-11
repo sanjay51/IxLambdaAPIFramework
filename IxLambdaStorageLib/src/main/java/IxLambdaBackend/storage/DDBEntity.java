@@ -31,10 +31,12 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     @Setter private Attribute sortKey;
 
     private Schema schema;
+    private AmazonDynamoDB ddb;
+
     @Setter @Getter private Map<String, Attribute> payload = new HashMap<>();
 
     public abstract Schema createSchema();
-    public abstract AmazonDynamoDB getDDB();
+    public abstract AmazonDynamoDB createDDBClient();
 
     /* Constructors */
     public DDBEntity(final String primaryKeyValue) {
@@ -115,20 +117,36 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
 
     public Map<String, Object> getAsKeyValueObject() {
         final Map<String, Object> entity = new HashMap<>();
-        entity.put(this.primaryKey.getName(), this.primaryKey.getValue());
-        if (this.sortKey != null) entity.put(this.sortKey.getName(), this.sortKey.getValue());
 
-        for (final Map.Entry<String, Attribute> attribute: this.payload.entrySet()) {
-            entity.put(attribute.getKey(), attribute.getValue().getValue());
+        // primary key
+        if (! isConfidential(primaryKey.getName())) entity.put(this.primaryKey.getName(), this.primaryKey.getValue());
+
+        // sort key
+        if (this.sortKey != null && !isConfidential(this.sortKey.getName()))
+            entity.put(this.sortKey.getName(), this.sortKey.getValue());
+
+        for (final Map.Entry<String, Attribute> entry: this.payload.entrySet()) {
+            if (!isConfidential(entry.getKey()))
+                entity.put(entry.getKey(), entry.getValue().getValue());
         }
 
         return entity;
+    }
+
+    private boolean isConfidential(final String attributeName) {
+        return this.getSchema().getAttributeTypes(attributeName).isConfidential();
     }
 
     public Schema getSchema() {
         if (this.schema == null) this.schema = createSchema();
 
         return this.schema;
+    }
+
+    public AmazonDynamoDB getDDB() {
+        if (this.ddb == null) this.ddb = createDDBClient();
+
+        return this.ddb;
     }
 
     public void setAttributeValue(final String attributeName, final Attribute attribute) {

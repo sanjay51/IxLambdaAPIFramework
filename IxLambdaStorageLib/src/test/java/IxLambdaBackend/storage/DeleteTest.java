@@ -71,7 +71,7 @@ public class DeleteTest {
         }
 
         @Override
-        public AmazonDynamoDB getDDB() {
+        public AmazonDynamoDB createDDBClient() {
             return mockDDB;
         }
     }

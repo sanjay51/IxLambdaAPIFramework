@@ -34,4 +34,8 @@ public class Schema {
     public ValueType getAttributeValueType(final String attributeName) {
         return this.attributeTypesMap.get(attributeName).getValueType();
     }
+
+    public Types getAttributeTypes(final String attributeName) {
+        return this.attributeTypesMap.get(attributeName);
+    }
 }
