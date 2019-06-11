@@ -2,7 +2,7 @@ package IxLambdaBackend.functional;
 
 import IxLambdaBackend.ActivityFactory;
 import IxLambdaBackend.activity.Activity;
-import IxLambdaBackend.storage.exception.InvalidInputException;
+import IxLambdaBackend.exception.InvalidInputException;
 import IxLambdaBackend.request.Request;
 import org.junit.jupiter.api.Test;
 

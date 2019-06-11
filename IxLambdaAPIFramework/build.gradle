@@ -12,7 +12,7 @@ sourceCompatibility = 1.8
 repositories {
     mavenCentral()
     flatDir {
-        dirs '/personal-workspace/DeclarativeAPILib/IxLambdaStorageLib/build/libs'
+        dirs '/personal-workspace/IxLambdaBackendFramework/IxLambdaStorageLib/build/libs'
     }
 }
 
@@ -20,6 +20,10 @@ dependencies {
     compile (
             'com.auth0:java-jwt:3.4.0',
             'IxLambdaBackendFramework:IxLambdaStorageLib:1.0',
+            'com.amazonaws:aws-lambda-java-core:1.2.0',
+            'com.amazonaws:aws-lambda-java-events:1.2.0',
+            'com.amazonaws:aws-java-sdk-athena:1.11.405',
+            'org.reflections:reflections:0.9.11'
     )
     compile group: 'org.apache.commons', name: 'commons-csv', version: '1.5'
     compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
@@ -41,7 +45,7 @@ jacocoTestCoverageVerification {
     violationRules {
         rule {
             limit {
-                minimum = 0.65
+                minimum = 0.50
             }
         }
     }

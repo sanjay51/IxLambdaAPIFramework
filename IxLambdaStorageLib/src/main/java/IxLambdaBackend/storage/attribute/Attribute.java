@@ -7,13 +7,14 @@ import IxLambdaBackend.storage.attribute.value.Value;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
 
 @Getter
 @AllArgsConstructor
 public class Attribute {
-    final String name;
-    final Value value;
-    final Metadata metadata;
+    @NonNull final String name;
+    @NonNull final Value value;
+    @NonNull final Metadata metadata;
 
     public AttributeValue getDynamoDBAttributeValue() {
         return this.value.toDynamoDBAttributeValue();

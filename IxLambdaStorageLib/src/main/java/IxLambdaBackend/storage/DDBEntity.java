@@ -141,6 +141,16 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
         else throw new InvalidInputException("Attribute not in schema: " + attributeName);
     }
 
+    public Value getAttribute(final String attributeName) {
+        if (this.primaryKey.getName().equals(attributeName))
+            return this.primaryKey.getValue();
+        else if (this.sortKey != null && this.sortKey.getName().equals(attributeName))
+            return this.sortKey.getValue();
+        else if (this.schema.getAttributeTypesMap().containsKey(attributeName))
+            return this.payload.get(attributeName).getValue();
+        else throw new InvalidInputException("Attribute does not exist: " + attributeName);
+    }
+
     public void clear() {
         this.payload = new HashMap<>();
     }

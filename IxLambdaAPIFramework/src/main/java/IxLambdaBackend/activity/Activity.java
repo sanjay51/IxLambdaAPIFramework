@@ -1,19 +1,20 @@
 package IxLambdaBackend.activity;
 
 import IxLambdaBackend.auth.AuthStrategy;
-import IxLambdaBackend.storage.exception.InvalidInputException;
+import IxLambdaBackend.exception.InvalidInputException;
 import IxLambdaBackend.exception.NotAuthorizedException;
 import IxLambdaBackend.request.Request;
 import IxLambdaBackend.response.Response;
 import IxLambdaBackend.validator.param.ValidationResponse;
 import lombok.NonNull;
+import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public abstract class Activity {
-    final Request request;
+    @Setter Request request;
     private Map<String, Parameter> parameterMap = new HashMap<>();
 
     protected abstract Response enact() throws Exception;
@@ -22,6 +23,9 @@ public abstract class Activity {
 
     public Activity(final Request request) {
         this.request = request;
+    }
+
+    public Activity() {
     }
 
     private void initialize() {
