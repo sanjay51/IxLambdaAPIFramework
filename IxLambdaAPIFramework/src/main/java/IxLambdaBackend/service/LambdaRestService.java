@@ -37,17 +37,21 @@ public abstract class LambdaRestService implements RequestHandler<Request, Respo
         final HttpMethod httpMethod = request.getContext().getHttpMethod();
 
         if (httpMethod == HttpMethod.GET) {
-            return this.invokeGetMethod(request);
+            try {
+                return this.invokeGetMethod(request);
+            } catch (final Exception e) {
+                throw new InternalError(e);
+            }
         }
 
         throw new InternalException("Something bad happened");
     }
 
-    private Response invokeGetMethod(final Request request) {
+    private Response invokeGetMethod(final Request request) throws Exception {
         try {
-            final Activity activity = (Activity) this.getMethods.iterator().next().invoke(this, request);
+            final Activity activity = (Activity) this.getMethods.iterator().next().invoke(this);
             activity.setRequest(request);
-            return new Response();
+            return activity.getResponse();
         } catch (IllegalAccessException|InvocationTargetException e) {
             throw new UnknownOperationException("Something bad happened" + e);
         }
