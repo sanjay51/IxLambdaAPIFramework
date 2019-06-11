@@ -16,14 +16,21 @@ repositories {
 dependencies {
     compile (
         'com.amazonaws:aws-lambda-java-core:1.2.0',
-        'com.amazonaws:aws-lambda-java-events:1.2.0',
-        'com.amazonaws:aws-java-sdk-athena:1.11.405',
-        'org.projectlombok:lombok:1.18.8'
+        'com.amazonaws:aws-lambda-java-events:1.2.0'
     )
 
+    compileOnly 'org.projectlombok:lombok:1.18.8'
     annotationProcessor 'org.projectlombok:lombok:1.18.8'
 
     testCompile "org.mockito:mockito-core:1.+"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }
+
+jar {
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+build.dependsOn jar
