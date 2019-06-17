@@ -2,7 +2,6 @@ package IxLambdaBackend;
 
 import IxLambdaBackend.activity.Activity;
 import IxLambdaBackend.auth.AuthenticationContext;
-import IxLambdaBackend.request.Params;
 import IxLambdaBackend.request.Request;
 import IxLambdaBackend.util.TokenUtils;
 
@@ -23,13 +22,11 @@ public class TestData {
     public static Request getSampleRequest() {
         Request request = new Request();
 
-        final Params params = new Params();
         final LinkedHashMap<String, String> queryString = new LinkedHashMap<>();
 
         queryString.put(PARAM_userId, TEST_USER_ID);
         queryString.put(PARAM_authToken, "test");
 
-        params.setQuerystring(queryString);
         request.setQueryStringParameters(queryString);
 
         return request;

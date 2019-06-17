@@ -17,10 +17,8 @@ dependencies {
     compile (
             'com.auth0:java-jwt:3.4.0',
             'com.amazonaws:aws-lambda-java-core:1.2.0',
-            'com.amazonaws:aws-lambda-java-events:1.2.0',
             'org.reflections:reflections:0.9.11'
     )
-    compile group: 'org.apache.commons', name: 'commons-csv', version: '1.5'
     compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
 

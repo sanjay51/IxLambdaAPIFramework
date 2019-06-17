@@ -1,14 +1,23 @@
 package IxLambdaBackend.response;
 
-import lombok.AllArgsConstructor;
+import com.google.gson.Gson;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 public class Response {
-    Object response;
+    static final Gson gson = new Gson();
+
+    boolean isBase64Encoded;
+    int statusCode;
+    Object headers;
+    Object multiValueHeaders;
+    Object body;
+
+    public Response(Object body) {
+        this.body = gson.toJson(body);
+        this.statusCode = 200;
+        this.isBase64Encoded = false;
+    }
 }
