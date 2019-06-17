@@ -2,6 +2,7 @@ package IxLambdaBackend.service;
 
 import IxLambdaBackend.annotation.GET;
 import IxLambdaBackend.annotation.POST;
+import IxLambdaBackend.request.HttpMethod;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -20,17 +21,21 @@ public class MethodResolver {
 
     public void init() {
         for (final Method m: getMethods) {
-            templateMethodMap.put(new Template(m.getAnnotation(GET.class).path()), m);
+            templateMethodMap.put(new Template(HttpMethod.GET, m.getAnnotation(GET.class).path()), m);
         }
 
         for (final Method m: postMethods) {
-            templateMethodMap.put(new Template(m.getAnnotation(POST.class).path()), m);
+            templateMethodMap.put(new Template(HttpMethod.POST, m.getAnnotation(POST.class).path()), m);
         }
     }
 
-    public Optional<MethodResponse> resolve(final String path) {
+    public Optional<MethodResponse> resolve(final HttpMethod httpMethod, final String path) {
         for (final Map.Entry<Template, Method> entry: templateMethodMap.entrySet()) {
-            Optional<Map<String, String>> pathAttributes = entry.getKey().parse(path);
+            final Template template = entry.getKey();
+
+            if (template.httpMethod != httpMethod) continue;
+
+            Optional<Map<String, String>> pathAttributes = template.parse(path);
             if (! pathAttributes.isPresent()) continue;
 
             return Optional.of(new MethodResponse(entry.getValue(), pathAttributes.get()));

@@ -119,15 +119,18 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
         final Map<String, Object> entity = new HashMap<>();
 
         // primary key
-        if (! isConfidential(primaryKey.getName())) entity.put(this.primaryKey.getName(), this.primaryKey.getValue());
+        if (! isConfidential(primaryKey.getName()))
+            entity.put(this.primaryKey.getName(), this.primaryKey.getValue().get());
 
         // sort key
         if (this.sortKey != null && !isConfidential(this.sortKey.getName()))
-            entity.put(this.sortKey.getName(), this.sortKey.getValue());
+            entity.put(this.sortKey.getName(), this.sortKey.getValue().get());
 
         for (final Map.Entry<String, Attribute> entry: this.payload.entrySet()) {
+            final Attribute attribute = entry.getValue();
+
             if (!isConfidential(entry.getKey()))
-                entity.put(entry.getKey(), entry.getValue().getValue());
+                entity.put(entry.getKey(), attribute.getValue().get());
         }
 
         return entity;

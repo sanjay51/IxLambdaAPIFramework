@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Response {
-    static final Gson gson = new Gson();
+    static final Gson gson = new Gson(); // TODO note: By default Gson would discard null values, change that.
 
     boolean isBase64Encoded;
     int statusCode;

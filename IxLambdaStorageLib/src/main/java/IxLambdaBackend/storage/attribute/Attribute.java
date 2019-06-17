@@ -21,18 +21,18 @@ public class Attribute {
     }
 
     public String getStringValue() {
-        return ((StringValue) this.value).getValue();
+        return ((StringValue) this.value).get();
     }
 
     public int getIntValue() {
-        return (int) ((NumberValue) this.value).getValue();
+        return ((NumberValue) this.value).get().intValue();
     }
 
     public float getFloatValue() {
-        return (float) ((NumberValue) this.value).getValue();
+        return ((NumberValue) this.value).get().floatValue();
     }
 
     public boolean getBooleanValue() {
-        return ((BooleanValue) this.value).isValue();
+        return ((BooleanValue) this.value).get();
     }
 }

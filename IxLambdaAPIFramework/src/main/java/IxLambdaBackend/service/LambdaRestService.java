@@ -47,24 +47,21 @@ public abstract class LambdaRestService implements RequestHandler<Request, Respo
 
     @Override
     public Response handleRequest(final Request request, final Context context) {
-        final HttpMethod httpMethod = HttpMethod.valueOf(request.getHttpMethod());
 
-        if (httpMethod == HttpMethod.GET) {
-            try {
-                return this.serveRequest(request);
-            } catch (final Exception e) {
-                throw new InternalError(e);
-            }
+        try {
+            return this.serveRequest(request);
+        } catch (final Exception e) {
+            throw new InternalError(e);
         }
-
-        throw new InternalException("Something bad happened");
     }
 
     private Response serveRequest(final Request request) throws Exception {
         try {
+            final HttpMethod httpMethod = HttpMethod.valueOf(request.getHttpMethod());
+
             System.out.println(gson.toJson(request));
 
-            final Optional<MethodResolver.MethodResponse> methodResponse = methodResolver.resolve(request.getPath());
+            final Optional<MethodResolver.MethodResponse> methodResponse = methodResolver.resolve(httpMethod, request.getPath());
             if (!methodResponse.isPresent()) throw new InternalException("Route not defined");
 
             final Method method = methodResponse.get().getMethod();

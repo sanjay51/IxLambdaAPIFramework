@@ -1,16 +1,19 @@
 package IxLambdaBackend.service;
 
+import IxLambdaBackend.request.HttpMethod;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
 import java.util.*;
 
 public class Template {
+    final HttpMethod httpMethod;
     final List<TemplateElement> templateElements = new ArrayList<>();
 
-    public Template(@NonNull final String template) {
+    public Template(@NonNull final HttpMethod httpMethod, @NonNull final String template) {
         validate(template);
 
+        this.httpMethod = httpMethod;
         final String[] pathElements = template.split("/");
 
         for (final String element : pathElements) {
