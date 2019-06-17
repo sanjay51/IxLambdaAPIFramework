@@ -10,16 +10,22 @@ import java.util.LinkedHashMap;
 @Getter
 @Setter
 public class Request {
-    private LinkedHashMap<String, String> body;
-    private Params params;
-    private Context context;
+    private String resource;
+    private String path;
+    private String httpMethod;
+    private LinkedHashMap<String, String> headers;
+    private LinkedHashMap<String, Object> multiValueHeaders;
+    private LinkedHashMap<String, String> queryStringParameters;
+    private LinkedHashMap<String, Object> multiValueQueryStringParameters;
+    private String body;
 
     @Override
     public String toString() {
-        return this.context.toString() +
-                "\n --- \n" +
-                this.params.toString() +
-                "\n --- \n" +
-                this.body.toString();
+        return " --- path --- \n" +
+                this.path +
+                "\n --- http method --- \n" +
+                this.httpMethod +
+                "\n --- body --- \n" +
+                this.body;
     }
 }

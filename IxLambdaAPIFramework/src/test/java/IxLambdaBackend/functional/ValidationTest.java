@@ -6,10 +6,7 @@ import IxLambdaBackend.exception.InvalidInputException;
 import IxLambdaBackend.request.Request;
 import org.junit.jupiter.api.Test;
 
-import static IxLambdaBackend.TestData.API_getUserById;
-import static IxLambdaBackend.TestData.PARAM_userId;
-import static IxLambdaBackend.TestData.getSampleRequest;
-import static IxLambdaBackend.TestData.sampleGetUserByIdActivity;
+import static IxLambdaBackend.TestData.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -22,7 +19,7 @@ public class ValidationTest {
     @Test
     public void assertExceptionForNullInputValue() {
         final Request request = getSampleRequest();
-        request.getParams().getQuerystring().put(PARAM_userId, null);
+        request.getQueryStringParameters().put(PARAM_userId, null);
         final Activity sampleGetUserByIdActivity = ActivityFactory.newInstance(API_getUserById, request);
 
         assertThrows(InvalidInputException.class, () -> sampleGetUserByIdActivity.getResponse());
@@ -31,7 +28,7 @@ public class ValidationTest {
     @Test
     public void assertExceptionForBlankInputValue() {
         final Request request = getSampleRequest();
-        request.getParams().getQuerystring().put(PARAM_userId, "");
+        request.getQueryStringParameters().put(PARAM_userId, "");
         final Activity sampleGetUserByIdActivity = ActivityFactory.newInstance(API_getUserById, request);
 
         assertThrows(InvalidInputException.class, () -> sampleGetUserByIdActivity.getResponse());

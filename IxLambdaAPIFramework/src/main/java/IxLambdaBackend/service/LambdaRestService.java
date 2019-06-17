@@ -16,29 +16,42 @@ import org.reflections.scanners.MethodAnnotationsScanner;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Optional;
 import java.util.Set;
 
 public abstract class LambdaRestService implements RequestHandler<Request, Response> {
 
     static final Gson gson = new Gson();
-    final Set<Method> getMethods;
-    final Set<Method> postMethods;
+    static boolean isInitialized = false;
+
+    static MethodResolver methodResolver;
 
     public LambdaRestService() {
-        final String packageName = this.getClass().getPackage().getName();
+        init();
+    }
+
+    void init() {
+        if (isInitialized) return;
+
+        final String packageName = getClass().getPackage().getName();
         final MethodAnnotationsScanner packageScanner = new MethodAnnotationsScanner();
 
-        this.getMethods = new Reflections(packageName, packageScanner).getMethodsAnnotatedWith(GET.class);
-        this.postMethods = new Reflections(packageName, packageScanner).getMethodsAnnotatedWith(POST.class);
+        final Set<Method> getMethods = new Reflections(packageName, packageScanner).getMethodsAnnotatedWith(GET.class);
+        final Set<Method> postMethods = new Reflections(packageName, packageScanner).getMethodsAnnotatedWith(POST.class);
+
+        methodResolver = new MethodResolver(getMethods, postMethods);
+        methodResolver.init();
+
+        isInitialized = true;
     }
 
     @Override
     public Response handleRequest(final Request request, final Context context) {
-        final HttpMethod httpMethod = request.getContext().getHttpMethod();
+        final HttpMethod httpMethod = HttpMethod.valueOf(request.getHttpMethod());
 
         if (httpMethod == HttpMethod.GET) {
             try {
-                return this.invokeGetMethod(request);
+                return this.serveRequest(request);
             } catch (final Exception e) {
                 throw new InternalError(e);
             }
@@ -47,11 +60,35 @@ public abstract class LambdaRestService implements RequestHandler<Request, Respo
         throw new InternalException("Something bad happened");
     }
 
-    private Response invokeGetMethod(final Request request) throws Exception {
+    private Response serveRequest(final Request request) throws Exception {
         try {
-            final Activity activity = (Activity) this.getMethods.iterator().next().invoke(this);
-            activity.setRequest(request);
-            return activity.getResponse();
+            System.out.println(gson.toJson(request));
+
+            final Optional<MethodResolver.MethodResponse> methodResponse = methodResolver.resolve(request.getPath());
+            if (!methodResponse.isPresent()) throw new InternalException("Route not defined");
+
+            final Method method = methodResponse.get().getMethod();
+
+            System.out.println(methodResponse);
+            System.out.println(method.getReturnType());
+
+            // If it's activity, handle activity
+            if (method.getReturnType() == Activity.class) {
+                final Activity activity = (Activity) method.invoke(this);
+                activity.setRequest(request);
+                activity.setPathParameters(methodResponse.get().getPathParameters());
+
+                return activity.getResponse();
+            }
+
+            // Check if can pass request object
+            if (method.getParameterCount() > 0 && method.getParameters()[0].getType() == Request.class) {
+                return new Response(method.invoke(this, request));
+            }
+
+            // Otherwise, just invoke the method directly
+            return new Response(method.invoke(this));
+
         } catch (IllegalAccessException|InvocationTargetException e) {
             throw new UnknownOperationException("Something bad happened" + e);
         }

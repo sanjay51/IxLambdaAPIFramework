@@ -4,12 +4,7 @@ import IxLambdaBackend.ActivityFactory;
 import IxLambdaBackend.activity.Activity;
 import IxLambdaBackend.activity.Parameter;
 import IxLambdaBackend.auth.authorization.Authorization;
-import IxLambdaBackend.auth.authorization.policy.AND;
-import IxLambdaBackend.auth.authorization.policy.AllowAlienPolicy;
-import IxLambdaBackend.auth.authorization.policy.AllowSelfPolicy;
-import IxLambdaBackend.auth.authorization.policy.DenyAllPolicy;
-import IxLambdaBackend.auth.authorization.policy.OR;
-import IxLambdaBackend.auth.authorization.policy.Policy;
+import IxLambdaBackend.auth.authorization.policy.*;
 import IxLambdaBackend.exception.NotAuthorizedException;
 import IxLambdaBackend.request.Request;
 import org.junit.jupiter.api.Test;
@@ -17,12 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static IxLambdaBackend.TestData.API_getUserById;
-import static IxLambdaBackend.TestData.PARAM_requesterAccessLevel;
-import static IxLambdaBackend.TestData.PARAM_requesterId;
-import static IxLambdaBackend.TestData.PARAM_userId;
-import static IxLambdaBackend.TestData.TEST_USER_ID;
-import static IxLambdaBackend.TestData.getSampleRequest;
+import static IxLambdaBackend.TestData.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

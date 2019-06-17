@@ -6,6 +6,7 @@ import IxLambdaBackend.exception.NotAuthorizedException;
 import IxLambdaBackend.request.Request;
 import IxLambdaBackend.response.Response;
 import IxLambdaBackend.validator.param.ValidationResponse;
+import com.google.common.collect.ImmutableMap;
 import lombok.NonNull;
 import lombok.Setter;
 
@@ -14,7 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class Activity {
-    @Setter Request request;
+    @Setter private Request request;
+    @Setter Map<String, String> pathParameters = ImmutableMap.of();
+
     private Map<String, Parameter> parameterMap = new HashMap<>();
 
     protected abstract Response enact() throws Exception;
@@ -29,10 +32,19 @@ public abstract class Activity {
     }
 
     private void initialize() {
-        final Map<String, String> queryParams = this.request.getParams().getQuerystring();
+        final Map<String, String> queryParams = this.request.getQueryStringParameters();
 
         this.getParameters().stream().forEach(parameter -> {
-            parameter.withValue(queryParams.get(parameter.getName()));
+            final String name = parameter.getName();
+
+            if (pathParameters.containsKey(name)) {
+                parameter.withValue(pathParameters.get(name));
+            }
+
+            if (queryParams != null && queryParams.containsKey(name)) {
+                parameter.withValue(queryParams.get(name));
+            }
+
             this.parameterMap.put(parameter.getName(), parameter);
         });
     }
