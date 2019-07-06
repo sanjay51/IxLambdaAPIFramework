@@ -32,7 +32,7 @@ public abstract class Activity {
     }
 
     private void initialize() {
-        final Map<String, String> queryParams = this.request.getQueryStringParameters();
+        final Map<String, String> params = this.request.getParameters();
 
         this.getParameters().stream().forEach(parameter -> {
             final String name = parameter.getName();
@@ -41,8 +41,8 @@ public abstract class Activity {
                 parameter.withValue(pathParameters.get(name));
             }
 
-            if (queryParams != null && queryParams.containsKey(name)) {
-                parameter.withValue(queryParams.get(name));
+            if (params != null && params.containsKey(name)) {
+                parameter.withValue(params.get(name));
             }
 
             this.parameterMap.put(parameter.getName(), parameter);
@@ -56,7 +56,7 @@ public abstract class Activity {
 
             final ValidationResponse validationResponse = parameter.validate();
             if (! validationResponse.isValid()) {
-                throw new InvalidInputException("Input validation failed.");
+                throw new InvalidInputException("Input validation failed for - " + paramName + ": " + validationResponse);
             }
         }
     }

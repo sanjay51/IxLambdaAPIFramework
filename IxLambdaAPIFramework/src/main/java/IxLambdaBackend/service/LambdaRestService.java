@@ -66,9 +66,6 @@ public abstract class LambdaRestService implements RequestHandler<Request, Respo
 
             final Method method = methodResponse.get().getMethod();
 
-            System.out.println(methodResponse);
-            System.out.println(method.getReturnType());
-
             // If it's activity, handle activity
             if (method.getReturnType() == Activity.class) {
                 final Activity activity = (Activity) method.invoke(this);
