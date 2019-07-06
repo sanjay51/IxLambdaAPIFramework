@@ -1,20 +1,16 @@
 package IxLambdaBackend.storage;
 
-import IxLambdaBackend.storage.exception.EntityAlreadyExistsException;
-import IxLambdaBackend.storage.exception.EntityNotFoundException;
-import IxLambdaBackend.storage.exception.InternalException;
-import IxLambdaBackend.storage.exception.InvalidInputException;
 import IxLambdaBackend.storage.attribute.Attribute;
-import IxLambdaBackend.storage.attribute.AttributeType;
-import IxLambdaBackend.storage.attribute.Metadata;
+import IxLambdaBackend.storage.attribute.IndexType;
 import IxLambdaBackend.storage.attribute.value.NumberValue;
 import IxLambdaBackend.storage.attribute.value.StringValue;
 import IxLambdaBackend.storage.attribute.value.Value;
 import IxLambdaBackend.storage.attribute.value.ValueType;
-import IxLambdaBackend.storage.ddb.DDBCreateStrategy;
-import IxLambdaBackend.storage.ddb.DDBDeleteStrategy;
-import IxLambdaBackend.storage.ddb.DDBReadStrategy;
-import IxLambdaBackend.storage.ddb.DDBUpdateStrategy;
+import IxLambdaBackend.storage.ddb.*;
+import IxLambdaBackend.storage.exception.EntityAlreadyExistsException;
+import IxLambdaBackend.storage.exception.EntityNotFoundException;
+import IxLambdaBackend.storage.exception.InternalException;
+import IxLambdaBackend.storage.exception.InvalidInputException;
 import IxLambdaBackend.storage.schema.Schema;
 import IxLambdaBackend.storage.schema.Types;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -25,10 +21,17 @@ import lombok.Setter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     @Setter private Attribute primaryKey;
     @Setter private Attribute sortKey;
+
+    @Setter private Attribute gsiPrimaryKey;
+    @Setter private Attribute gsiSortKey;
+
+    private boolean shouldReadFromGSI = false;
+    private String globalSecondaryIndexName = "";
 
     private Schema schema;
     private AmazonDynamoDB ddb;
@@ -41,15 +44,13 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     /* Constructors */
     public DDBEntity(final String primaryKeyValue) {
         this.primaryKey = new Attribute(this.getSchema().getPrimaryKeyName(),
-                new StringValue(primaryKeyValue),
-                new Metadata(AttributeType.PRIMARY_KEY));
+                new StringValue(primaryKeyValue));
 
     }
 
     public DDBEntity(final double primaryKeyValue) {
         this.primaryKey = new Attribute(this.getSchema().getPrimaryKeyName(),
-                new NumberValue(primaryKeyValue),
-                new Metadata(AttributeType.PRIMARY_KEY));
+                new NumberValue(primaryKeyValue));
 
     }
 
@@ -58,8 +59,21 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
 
         if (this.getSchema().getSortKeyName().isPresent())
             this.sortKey = new Attribute(this.getSchema().getSortKeyName().get(),
-                                                 new StringValue(sortKeyValue),
-                                                 new Metadata(AttributeType.SORT_KEY));
+                                                 new StringValue(sortKeyValue));
+    }
+
+    /** GSI based constructor **/
+    public DDBEntity(final String gsiPrimaryKeyValue, final String gsiSortKeyValue, final String gsiIndexName) {
+        this.gsiPrimaryKey = new Attribute(this.getSchema().getGSIPrimaryKeyName().get(),
+                new StringValue(gsiPrimaryKeyValue));
+
+        final Optional<String> gsiSortKeyName = this.getSchema().getSortKeyName();
+        if (gsiSortKeyName.isPresent())
+            this.sortKey = new Attribute(gsiSortKeyName.get(),
+                    new StringValue(gsiSortKeyValue));
+
+        this.shouldReadFromGSI = true;
+        this.globalSecondaryIndexName = gsiIndexName;
     }
 
     /* CRUD operations */
@@ -71,25 +85,53 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
 
     @Override
     public T read() throws EntityNotFoundException, InternalException {
+        if (shouldReadFromGSI) {
+            readByGSI();
+            return (T) this;
+        }
+
         // read
         final Map<String, AttributeValue> response = DDBReadStrategy.execute(this.primaryKey,
                 this.sortKey, this.getSchema().getTableName(), this.getDDB());
 
         // populate
-        for (final Map.Entry<String, Types> attributeTypesEntry: this.getSchema().getAttributeTypesMap().entrySet()) {
-            if (attributeTypesEntry.getValue().getAttributeType() != AttributeType.REGULAR) continue;
-
-            final String attributeName = attributeTypesEntry.getKey();
-            final ValueType attributeValueType = this.getSchema().getAttributeValueType(attributeName);
-
-            final AttributeValue value = response.get(attributeName);
-            final Attribute attribute = new Attribute(attributeName,
-                    Value.fromDynamoDBAttributeValue(value, attributeValueType),
-                    new Metadata(AttributeType.REGULAR));
-            this.payload.put(attributeName, attribute);
-        }
+        populate(response);
 
         return (T) this;
+    }
+
+    private T readByGSI() throws EntityNotFoundException, InternalException {
+        // read
+        final Map<String, AttributeValue> response = DDBGSIReadStrategy.execute(this.gsiPrimaryKey,
+                this.gsiSortKey, this.getSchema().getTableName(), this.globalSecondaryIndexName, this.getDDB());
+
+        // populate
+        populate(response);
+
+        return (T) this;
+    }
+
+    private void populate(Map<String, AttributeValue> values) {
+        for (final Map.Entry<String, Types> attributeTypesEntry: this.getSchema().getAttributeTypesMap().entrySet()) {
+            final String attributeName = attributeTypesEntry.getKey();
+            final ValueType attributeValueType = this.getSchema().getAttributeValueType(attributeName);
+            final Value value = Value.fromDynamoDBAttributeValue(values.get(attributeName), attributeValueType);
+
+            // Is it a primary key?
+            if (attributeTypesEntry.getValue().getIndexType() == IndexType.PRIMARY_KEY) {
+                this.primaryKey = new Attribute(attributeName, value);
+            }
+
+            // Is this a secondary key?
+            else if (attributeTypesEntry.getValue().getIndexType() == IndexType.SORT_KEY) {
+                this.sortKey = new Attribute(attributeName, value);
+            }
+
+            else {
+                final Attribute attribute = new Attribute(attributeName, value);
+                this.payload.put(attributeName, attribute);
+            }
+        }
     }
 
     @Override
@@ -164,12 +206,12 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
 
     public void setAttributeValue(final String attributeName, final String attributeValue) {
         this.setAttributeValue(attributeName,
-                new Attribute(attributeName, new StringValue(attributeValue), new Metadata(AttributeType.REGULAR)));
+                new Attribute(attributeName, new StringValue(attributeValue)));
     }
 
     public void setAttributeValue(final String attributeName, final double attributeValue) {
         this.setAttributeValue(attributeName,
-                new Attribute(attributeName, new NumberValue(attributeValue), new Metadata(AttributeType.REGULAR)));
+                new Attribute(attributeName, new NumberValue(attributeValue)));
     }
 
     public Value getAttribute(final String attributeName) {

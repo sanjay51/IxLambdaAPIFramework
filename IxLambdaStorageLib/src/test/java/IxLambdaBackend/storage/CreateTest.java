@@ -1,9 +1,9 @@
 package IxLambdaBackend.storage;
 
+import IxLambdaBackend.storage.attribute.IndexType;
+import IxLambdaBackend.storage.attribute.value.ValueType;
 import IxLambdaBackend.storage.exception.EntityAlreadyExistsException;
 import IxLambdaBackend.storage.exception.InternalException;
-import IxLambdaBackend.storage.attribute.AttributeType;
-import IxLambdaBackend.storage.attribute.value.ValueType;
 import IxLambdaBackend.storage.schema.Schema;
 import IxLambdaBackend.storage.schema.Types;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -18,9 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CreateTest {
@@ -64,10 +62,10 @@ class CreateTest {
         @Override
         public Schema createSchema() {
             final Map<String, Types> attributeTypesMap = new HashMap<String, Types>() {{
-                put("userId", new Types(AttributeType.PRIMARY_KEY, ValueType.STRING));
-                put("email", new Types(AttributeType.REGULAR, ValueType.STRING));
-                put("name", new Types(AttributeType.REGULAR, ValueType.STRING));
-                put("age", new Types(AttributeType.REGULAR, ValueType.NUMBER));
+                put("userId", new Types(ValueType.STRING, IndexType.PRIMARY_KEY));
+                put("email", new Types(ValueType.STRING));
+                put("name", new Types(ValueType.STRING));
+                put("age", new Types(ValueType.NUMBER));
             }};
 
             return new Schema("users", attributeTypesMap);

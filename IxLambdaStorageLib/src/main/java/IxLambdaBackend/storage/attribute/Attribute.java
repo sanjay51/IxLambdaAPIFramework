@@ -14,7 +14,6 @@ import lombok.NonNull;
 public class Attribute {
     @NonNull final String name;
     @NonNull final Value value;
-    @NonNull final Metadata metadata;
 
     public AttributeValue getDynamoDBAttributeValue() {
         return this.value.toDynamoDBAttributeValue();

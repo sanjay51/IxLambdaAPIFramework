@@ -1,6 +1,6 @@
 package IxLambdaBackend.storage.schema;
 
-import IxLambdaBackend.storage.attribute.AttributeType;
+import IxLambdaBackend.storage.attribute.IndexType;
 import IxLambdaBackend.storage.attribute.value.ValueType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +17,7 @@ public class Schema {
     public String getPrimaryKeyName() {
         return this.attributeTypesMap.entrySet()
                 .stream()
-                .filter(e -> e.getValue().getAttributeType() == AttributeType.PRIMARY_KEY)
+                .filter(e -> e.getValue().getIndexType() == IndexType.PRIMARY_KEY)
                 .findFirst()
                 .map(e -> e.getKey())
                 .get();
@@ -26,9 +26,27 @@ public class Schema {
     public Optional<String> getSortKeyName() {
         return this.attributeTypesMap.entrySet()
                 .stream()
-                .filter(e -> e.getValue().getAttributeType() == AttributeType.SORT_KEY)
+                .filter(e -> e.getValue().getIndexType() == IndexType.SORT_KEY)
                 .findFirst()
                 .map(e -> e.getKey());
+    }
+
+    public Optional<String> getGSIPrimaryKeyName() {
+        return this.attributeTypesMap.entrySet()
+                .stream()
+                .filter(e -> e.getValue().getIndexType() == IndexType.GSI_PRIMARY_KEY)
+                .findFirst()
+                .map(e -> e.getKey());
+
+    }
+
+    public Optional<String> getGSISortKeyName() {
+        return this.attributeTypesMap.entrySet()
+                .stream()
+                .filter(e -> e.getValue().getIndexType() == IndexType.GSI_SORT_KEY)
+                .findFirst()
+                .map(e -> e.getKey());
+
     }
 
     public ValueType getAttributeValueType(final String attributeName) {
