@@ -162,6 +162,16 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
         else throw new InvalidInputException("Attribute not in schema: " + attributeName);
     }
 
+    public void setAttributeValue(final String attributeName, final String attributeValue) {
+        this.setAttributeValue(attributeName,
+                new Attribute(attributeName, new StringValue(attributeValue), new Metadata(AttributeType.REGULAR)));
+    }
+
+    public void setAttributeValue(final String attributeName, final double attributeValue) {
+        this.setAttributeValue(attributeName,
+                new Attribute(attributeName, new NumberValue(attributeValue), new Metadata(AttributeType.REGULAR)));
+    }
+
     public Value getAttribute(final String attributeName) {
         if (this.primaryKey.getName().equals(attributeName))
             return this.primaryKey.getValue();
