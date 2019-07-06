@@ -32,7 +32,7 @@ public abstract class Activity {
     }
 
     private void initialize() {
-        final Map<String, String> params = this.request.getParameters();
+        final Map<String, String> queryAndBodyParams = this.request.getQueryOrBodyParameters();
 
         this.getParameters().stream().forEach(parameter -> {
             final String name = parameter.getName();
@@ -41,8 +41,8 @@ public abstract class Activity {
                 parameter.withValue(pathParameters.get(name));
             }
 
-            if (params != null && params.containsKey(name)) {
-                parameter.withValue(params.get(name));
+            if (queryAndBodyParams != null && queryAndBodyParams.containsKey(name)) {
+                parameter.withValue(queryAndBodyParams.get(name));
             }
 
             this.parameterMap.put(parameter.getName(), parameter);

@@ -34,7 +34,7 @@ public class Request {
                 this.body;
     }
 
-    public Map<String, String> getParameters() {
+    public Map<String, String> getQueryOrBodyParameters() {
         if (StringUtils.isBlank(httpMethod)) return queryStringParameters;
         if (HttpMethod.GET.name().equals(httpMethod)) return queryStringParameters;
 
