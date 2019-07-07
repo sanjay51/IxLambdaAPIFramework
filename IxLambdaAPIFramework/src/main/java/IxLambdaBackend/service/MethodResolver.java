@@ -1,6 +1,7 @@
 package IxLambdaBackend.service;
 
 import IxLambdaBackend.annotation.GET;
+import IxLambdaBackend.annotation.PATCH;
 import IxLambdaBackend.annotation.POST;
 import IxLambdaBackend.request.HttpMethod;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.Set;
 public class MethodResolver {
     final Set<Method> getMethods;
     final Set<Method> postMethods;
+    final Set<Method> patchMethods;
 
     final Map<Template, Method> templateMethodMap = new HashMap<>();
 
@@ -26,6 +28,10 @@ public class MethodResolver {
 
         for (final Method m: postMethods) {
             templateMethodMap.put(new Template(HttpMethod.POST, m.getAnnotation(POST.class).path()), m);
+        }
+
+        for (final Method m: patchMethods) {
+            templateMethodMap.put(new Template(HttpMethod.PATCH, m.getAnnotation(PATCH.class).path()), m);
         }
     }
 

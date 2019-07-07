@@ -2,6 +2,7 @@ package IxLambdaBackend.service;
 
 import IxLambdaBackend.activity.Activity;
 import IxLambdaBackend.annotation.GET;
+import IxLambdaBackend.annotation.PATCH;
 import IxLambdaBackend.annotation.POST;
 import IxLambdaBackend.exception.InternalException;
 import IxLambdaBackend.exception.UnknownOperationException;
@@ -38,8 +39,9 @@ public abstract class LambdaRestService implements RequestHandler<Request, Respo
 
         final Set<Method> getMethods = new Reflections(packageName, packageScanner).getMethodsAnnotatedWith(GET.class);
         final Set<Method> postMethods = new Reflections(packageName, packageScanner).getMethodsAnnotatedWith(POST.class);
+        final Set<Method> patchMethods = new Reflections(packageName, packageScanner).getMethodsAnnotatedWith(PATCH.class);
 
-        methodResolver = new MethodResolver(getMethods, postMethods);
+        methodResolver = new MethodResolver(getMethods, postMethods, patchMethods);
         methodResolver.init();
 
         isInitialized = true;
