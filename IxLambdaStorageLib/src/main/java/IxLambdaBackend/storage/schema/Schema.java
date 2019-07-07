@@ -56,4 +56,8 @@ public class Schema {
     public Types getAttributeTypes(final String attributeName) {
         return this.attributeTypesMap.get(attributeName);
     }
+
+    public boolean isValidAttribute(final String attributeName) {
+        return this.attributeTypesMap.get(attributeName) != null;
+    }
 }
