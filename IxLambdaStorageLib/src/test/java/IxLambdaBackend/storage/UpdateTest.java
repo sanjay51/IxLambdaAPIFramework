@@ -1,12 +1,10 @@
 package IxLambdaBackend.storage;
 
-import IxLambdaBackend.storage.attribute.Attribute;
-import IxLambdaBackend.storage.attribute.IndexType;
-import IxLambdaBackend.storage.attribute.value.StringValue;
 import IxLambdaBackend.storage.attribute.value.ValueType;
 import IxLambdaBackend.storage.exception.EntityNotFoundException;
 import IxLambdaBackend.storage.exception.InternalException;
 import IxLambdaBackend.storage.exception.InvalidInputException;
+import IxLambdaBackend.storage.schema.IndexType;
 import IxLambdaBackend.storage.schema.Schema;
 import IxLambdaBackend.storage.schema.Types;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -38,8 +36,7 @@ class UpdateTest {
         doReturn(null).when(mockDDB).putItem(any());
 
         final UserEntity entity = new UserEntity("sanjay");
-        entity.setAttributeValue("email",
-                new Attribute("email", new StringValue("asdf")));
+        entity.setAttributeValue("email", "asdf");
         Assertions.assertDoesNotThrow(() -> entity.update());
     }
 
@@ -62,10 +59,8 @@ class UpdateTest {
     @Test
     void assertInvalidInputExceptionIfAttributeNotInSchema() {
         final UserEntity entity = new UserEntity("sanjay");
-        final Attribute badAttribute =
-                new Attribute("email", new StringValue("asdf"));
         assertThrows(InvalidInputException.class, () ->
-                entity.setAttributeValue("badAttribute", badAttribute));
+                entity.setAttributeValue("badAttribute", "asdf"));
     }
 
     class UserEntity extends DDBEntity {

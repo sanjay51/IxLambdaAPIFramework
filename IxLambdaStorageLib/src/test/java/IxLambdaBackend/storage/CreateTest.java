@@ -1,6 +1,6 @@
 package IxLambdaBackend.storage;
 
-import IxLambdaBackend.storage.attribute.IndexType;
+import IxLambdaBackend.storage.schema.IndexType;
 import IxLambdaBackend.storage.attribute.value.ValueType;
 import IxLambdaBackend.storage.exception.EntityAlreadyExistsException;
 import IxLambdaBackend.storage.exception.InternalException;

@@ -1,6 +1,5 @@
 package IxLambdaBackend.storage.schema;
 
-import IxLambdaBackend.storage.attribute.IndexType;
 import IxLambdaBackend.storage.attribute.value.ValueType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -59,5 +58,15 @@ public class Schema {
 
     public boolean isValidAttribute(final String attributeName) {
         return this.attributeTypesMap.get(attributeName) != null;
+    }
+
+    public boolean hasWriteAccess(final String attributeName) {
+        final AccessType access = this.attributeTypesMap.get(attributeName).getAccess();
+        return (access == AccessType.READ_WRITE) || (access == AccessType.WRITE_ONLY);
+    }
+
+    public boolean hasReadAccess(final String attributeName) {
+        final AccessType access = this.attributeTypesMap.get(attributeName).getAccess();
+        return (access == AccessType.READ_WRITE) || (access == AccessType.READ_ONLY);
     }
 }

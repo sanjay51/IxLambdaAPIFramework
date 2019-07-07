@@ -1,11 +1,9 @@
 package IxLambdaBackend.storage;
 
 import IxLambdaBackend.storage.attribute.Attribute;
-import IxLambdaBackend.storage.attribute.IndexType;
-import IxLambdaBackend.storage.attribute.value.NumberValue;
-import IxLambdaBackend.storage.attribute.value.StringValue;
-import IxLambdaBackend.storage.attribute.value.Value;
-import IxLambdaBackend.storage.attribute.value.ValueType;
+import IxLambdaBackend.storage.attribute.value.*;
+import IxLambdaBackend.storage.schema.AccessType;
+import IxLambdaBackend.storage.schema.IndexType;
 import IxLambdaBackend.storage.ddb.*;
 import IxLambdaBackend.storage.exception.EntityAlreadyExistsException;
 import IxLambdaBackend.storage.exception.EntityNotFoundException;
@@ -22,6 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static IxLambdaBackend.storage.schema.AccessType.READ_ONLY;
+import static IxLambdaBackend.storage.schema.AccessType.READ_WRITE;
 
 public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     @Setter private Attribute primaryKey;
@@ -161,25 +162,26 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
         final Map<String, Object> entity = new HashMap<>();
 
         // primary key
-        if (! isConfidential(primaryKey.getName()))
+        if (hasReadAccess(primaryKey.getName()))
             entity.put(this.primaryKey.getName(), this.primaryKey.getValue().get());
 
         // sort key
-        if (this.sortKey != null && !isConfidential(this.sortKey.getName()))
+        if (this.sortKey != null && hasReadAccess(this.sortKey.getName()))
             entity.put(this.sortKey.getName(), this.sortKey.getValue().get());
 
         for (final Map.Entry<String, Attribute> entry: this.payload.entrySet()) {
             final Attribute attribute = entry.getValue();
 
-            if (!isConfidential(entry.getKey()))
+            if (hasReadAccess(entry.getKey()))
                 entity.put(entry.getKey(), attribute.getValue().get());
         }
 
         return entity;
     }
 
-    private boolean isConfidential(final String attributeName) {
-        return this.getSchema().getAttributeTypes(attributeName).isConfidential();
+    private boolean hasReadAccess(final String attributeName) {
+        final AccessType access = this.getSchema().getAttributeTypes(attributeName).getAccess();
+        return (access == READ_ONLY) || (access == READ_WRITE);
     }
 
     public Schema getSchema() {
@@ -194,7 +196,7 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
         return this.ddb;
     }
 
-    public void setAttributeValue(final String attributeName, final Attribute attribute) {
+    public void setAttribute(final String attributeName, final Attribute attribute) {
         if (this.primaryKey.getName().equals(attributeName))
             this.primaryKey = attribute;
         else if (this.sortKey != null && this.sortKey.getName().equals(attributeName))
@@ -205,13 +207,31 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     }
 
     public void setAttributeValue(final String attributeName, final String attributeValue) {
-        this.setAttributeValue(attributeName,
-                new Attribute(attributeName, new StringValue(attributeValue)));
+        final ValueType valueType = schema.getAttributeTypes(attributeName).getValueType();
+
+        if (valueType == ValueType.NUMBER) {
+            this.setNumberAttributeValue(attributeName, Double.parseDouble(attributeValue));
+        }
+
+        else if (valueType == ValueType.BOOLEAN) {
+            this.setBooleanAttributeValue(attributeName, Boolean.parseBoolean(attributeValue));
+        }
+
+        else {
+            final Attribute attribute = new Attribute(attributeName, new StringValue(attributeValue));
+            this.setAttribute(attributeName, attribute);
+        }
+
     }
 
-    public void setAttributeValue(final String attributeName, final double attributeValue) {
-        this.setAttributeValue(attributeName,
+    public void setNumberAttributeValue(final String attributeName, final double attributeValue) {
+        this.setAttribute(attributeName,
                 new Attribute(attributeName, new NumberValue(attributeValue)));
+    }
+
+    public void setBooleanAttributeValue(final String attributeName, final boolean attributeValue) {
+        this.setAttribute(attributeName,
+                new Attribute(attributeName, new BooleanValue(attributeValue)));
     }
 
     public Value getAttribute(final String attributeName) {
