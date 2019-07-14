@@ -2,6 +2,9 @@ package IxLambdaBackend.storage.attribute.value;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public abstract class Value<T> {
     //https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBMapper.DataTypes.html
 
@@ -20,6 +23,9 @@ public abstract class Value<T> {
 
             case STRING:
                 return new StringValue(attributeValue.getS());
+
+            case STRING_SET:
+                return new StringSetValue(new HashSet<>(attributeValue.getSS()));
 
             default:
                 return new NullValue();
