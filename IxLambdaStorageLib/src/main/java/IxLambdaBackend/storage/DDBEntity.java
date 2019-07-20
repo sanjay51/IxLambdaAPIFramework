@@ -60,7 +60,15 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
 
         if (this.getSchema().getSortKeyName().isPresent())
             this.sortKey = new Attribute(this.getSchema().getSortKeyName().get(),
-                                                 new StringValue(sortKeyValue));
+                    new StringValue(sortKeyValue));
+    }
+
+    public DDBEntity(final String primaryKeyValue, final double sortKeyValue) {
+        this(primaryKeyValue);
+
+        if (this.getSchema().getSortKeyName().isPresent())
+            this.sortKey = new Attribute(this.getSchema().getSortKeyName().get(),
+                    new NumberValue(sortKeyValue));
     }
 
     /** GSI based constructor **/
