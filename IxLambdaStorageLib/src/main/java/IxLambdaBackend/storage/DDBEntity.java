@@ -16,10 +16,7 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static IxLambdaBackend.storage.schema.AccessType.READ_ONLY;
 import static IxLambdaBackend.storage.schema.AccessType.READ_WRITE;
@@ -42,7 +39,10 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     public abstract Schema createSchema();
     public abstract AmazonDynamoDB createDDBClient();
 
+
     /* Constructors */
+    public DDBEntity() {}
+
     public DDBEntity(final String primaryKeyValue) {
         this.primaryKey = new Attribute(this.getSchema().getPrimaryKeyName(),
                 new StringValue(primaryKeyValue));
@@ -85,6 +85,21 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
         this.globalSecondaryIndexName = gsiIndexName;
     }
 
+    public List<T> getAllByGSI(final String gsiPrimaryKeyValue, final String indexName) throws EntityNotFoundException, InternalException {
+        final Attribute attribute = new Attribute(this.getSchema().getGSIPrimaryKeyName().get(), new StringValue(gsiPrimaryKeyValue));
+        final List<Map<String, AttributeValue>> rows =
+                DDBGSIReadAllStrategy.execute(attribute, this.getSchema().getTableName(), indexName, this.getDDB());
+
+
+        final List<T> entities = new ArrayList<>();
+        for (Map<String, AttributeValue> row: rows) {
+            final DDBEntity<T> entity = new GenericDDBEntity(this.getSchema(), this.getDDB(), row);
+            entities.add((T) entity);
+        }
+
+        return entities;
+    }
+
     /* CRUD operations */
     @Override
     public T create() throws EntityAlreadyExistsException, InternalException {
@@ -120,7 +135,7 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
         return (T) this;
     }
 
-    private void populate(Map<String, AttributeValue> values) {
+    protected void populate(Map<String, AttributeValue> values) {
         for (final Map.Entry<String, Types> attributeTypesEntry: this.getSchema().getAttributeTypesMap().entrySet()) {
             final String attributeName = attributeTypesEntry.getKey();
             final ValueType attributeValueType = this.getSchema().getAttributeValueType(attributeName);
@@ -254,5 +269,27 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
 
     public void clear() {
         this.payload = new HashMap<>();
+    }
+
+
+    class GenericDDBEntity extends DDBEntity {
+        final Schema schema;
+        final AmazonDynamoDB ddb;
+
+        GenericDDBEntity(final Schema schema, final AmazonDynamoDB ddb, final Map<String, AttributeValue> attributes) {
+            this.schema = schema;
+            this.ddb = ddb;
+            this.populate(attributes);
+        }
+
+        @Override
+        public Schema createSchema() {
+            return this.schema;
+        }
+
+        @Override
+        public AmazonDynamoDB createDDBClient() {
+            return this.ddb;
+        }
     }
 }
