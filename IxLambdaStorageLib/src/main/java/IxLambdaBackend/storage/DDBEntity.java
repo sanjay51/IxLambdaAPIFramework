@@ -85,16 +85,16 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
         this.globalSecondaryIndexName = gsiIndexName;
     }
 
-    public List<T> getAllByGSI(final String gsiPrimaryKeyValue, final String indexName) throws EntityNotFoundException, InternalException {
+    public List<DDBEntity> getAllByGSI(final String gsiPrimaryKeyValue, final String indexName) throws EntityNotFoundException, InternalException {
         final Attribute attribute = new Attribute(this.getSchema().getGSIPrimaryKeyName().get(), new StringValue(gsiPrimaryKeyValue));
         final List<Map<String, AttributeValue>> rows =
                 DDBGSIReadAllStrategy.execute(attribute, this.getSchema().getTableName(), indexName, this.getDDB());
 
 
-        final List<T> entities = new ArrayList<>();
+        final List<DDBEntity> entities = new ArrayList<>();
         for (Map<String, AttributeValue> row: rows) {
-            final DDBEntity<T> entity = new GenericDDBEntity(this.getSchema(), this.getDDB(), row);
-            entities.add((T) entity);
+            final DDBEntity entity = new GenericDDBEntity(this.getSchema(), this.getDDB(), row);
+            entities.add(entity);
         }
 
         return entities;

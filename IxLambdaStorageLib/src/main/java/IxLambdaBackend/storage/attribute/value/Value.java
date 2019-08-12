@@ -29,7 +29,8 @@ public abstract class Value<T> {
 
             case STRING_SET:
                 List<String> ss = attributeValue.getSS();
-                return new StringSetValue(ss == null? new HashSet<>(): new HashSet<>(ss));
+                if (ss == null) return new NullValue();
+                return new StringSetValue(new HashSet<>(ss));
 
             default:
                 return new NullValue();
