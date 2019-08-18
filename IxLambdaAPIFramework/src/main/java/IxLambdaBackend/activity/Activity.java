@@ -84,6 +84,11 @@ public abstract class Activity {
         return this.parameterMap.get(name);
     }
 
+    public String getStringParameterByName(@NonNull final String name) {
+        if (this.parameterMap.containsKey(name)) return this.parameterMap.get(name).getStringValue();
+        return null;
+    }
+
     public void addParameter(final Parameter parameter) {
         this.parameterMap.put(parameter.getName(), parameter);
     }
