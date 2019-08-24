@@ -67,10 +67,10 @@ public abstract class S3Entity <T extends S3Entity<T>> implements Entity <T> {
     }
 
     @Override
-    public List<T> getAll() throws InternalException {
+    public List<Entity> getAll() throws InternalException {
         return this.getS3().listObjectsV2(this.bucketName).getObjectSummaries()
                 .stream()
-                .map(a -> (T) new GenericS3Entity(a.getBucketName(), a.getKey(), this.getS3()))
+                .map(a -> new GenericS3Entity(a.getBucketName(), a.getKey(), this.getS3()))
                 .collect(Collectors.toList());
     }
 

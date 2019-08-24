@@ -171,8 +171,18 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
 
     /* List operations */
     @Override
-    public List<T> getAll() {
-        return null;
+    public List<Entity> getAll() throws InternalException, EntityNotFoundException {
+        final List<Map<String, AttributeValue>> rows =
+                DDBReadAllStrategy.execute(this.primaryKey, this.getSchema().getTableName(), this.getDDB());
+
+
+        final List<Entity> entities = new ArrayList<>();
+        for (Map<String, AttributeValue> row: rows) {
+            final Entity entity = new GenericDDBEntity(this.getSchema(), this.getDDB(), row);
+            entities.add(entity);
+        }
+
+        return entities;
     }
 
     /* Utilities */

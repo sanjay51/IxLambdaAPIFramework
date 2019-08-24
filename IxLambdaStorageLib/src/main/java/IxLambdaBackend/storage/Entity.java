@@ -11,6 +11,6 @@ public interface Entity<T extends Entity<T>> {
     T read() throws EntityNotFoundException, InternalException;
     T update() throws EntityNotFoundException, InternalException;
     void delete() throws InternalException;
-    List<T> getAll() throws InternalException;
+    List<Entity> getAll() throws InternalException, EntityNotFoundException;
     void validate();
 }
