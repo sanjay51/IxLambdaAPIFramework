@@ -1,6 +1,7 @@
 package IxLambdaBackend.activity;
 
 import IxLambdaBackend.auth.AuthStrategy;
+import IxLambdaBackend.exception.InternalException;
 import IxLambdaBackend.exception.InvalidInputException;
 import IxLambdaBackend.exception.NotAuthorizedException;
 import IxLambdaBackend.request.Request;
@@ -61,7 +62,7 @@ public abstract class Activity {
         }
     }
 
-    protected void preprocess() {
+    protected void preprocess() throws Exception {
 
     }
 
