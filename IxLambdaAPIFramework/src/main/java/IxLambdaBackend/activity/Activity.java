@@ -61,6 +61,10 @@ public abstract class Activity {
         }
     }
 
+    protected void preprocess() {
+
+    }
+
     protected void checkAuth() throws NotAuthorizedException {
         if (this.getAuthStrategies() == null) return;
 
@@ -76,6 +80,7 @@ public abstract class Activity {
     public Response getResponse() throws Exception {
         this.initialize();
         this.validateRequest();
+        this.preprocess();
         this.checkAuth();
         return this.enact();
     }
