@@ -4,6 +4,7 @@ import IxLambdaBackend.storage.exception.InternalException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.util.IOUtils;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,8 +13,8 @@ public abstract class S3Entity <T extends S3Entity<T>> implements Entity <T> {
     private AmazonS3 s3;
 
     private final String bucketName;
-    @Getter private String key = null;
-    @Getter private String value = null;
+    @Getter @Setter private String key = null;
+    @Getter @Setter private String value = null;
 
     public S3Entity(final String bucketName, final String key, final String value) {
         this(bucketName, key);
