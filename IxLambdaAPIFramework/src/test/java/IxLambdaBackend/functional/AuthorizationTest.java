@@ -21,9 +21,8 @@ public class AuthorizationTest {
     @Test
     public void testSelfAccessBasedAuthorization() {
         final Policy selfAllowPolicy = new AllowSelfPolicy(PARAM_userId, PARAM_requesterId);
-        final List<Policy> policies = Arrays.asList(selfAllowPolicy);
 
-        final Authorization authorizationStrategy = new Authorization(policies);
+        final Authorization authorizationStrategy = new Authorization(selfAllowPolicy);
 
         final Request request = getSampleRequest();
 
@@ -37,9 +36,8 @@ public class AuthorizationTest {
     @Test
     public void testAlienAccessBasedAuthorization() {
         final Policy allowAlienPolicy = new AllowAlienPolicy(PARAM_userId, PARAM_requesterId, PARAM_requesterAccessLevel, 6);
-        final List<Policy> policies = Arrays.asList(allowAlienPolicy);
 
-        final Authorization authorizationStrategy = new Authorization(policies);
+        final Authorization authorizationStrategy = new Authorization(allowAlienPolicy);
 
         final Request request = getSampleRequest();
 
@@ -54,9 +52,8 @@ public class AuthorizationTest {
     @Test
     public void testAlienAccessWithLevelSameAsMinimum() {
         final Policy allowAlienPolicy = new AllowAlienPolicy(PARAM_userId, PARAM_requesterId, PARAM_requesterAccessLevel, 6);
-        final List<Policy> policies = Arrays.asList(allowAlienPolicy);
 
-        final Authorization authorizationStrategy = new Authorization(policies);
+        final Authorization authorizationStrategy = new Authorization(allowAlienPolicy);
 
         final Request request = getSampleRequest();
 
@@ -71,9 +68,8 @@ public class AuthorizationTest {
     @Test
     public void assertExceptionOnAuthorizationFailure() {
         final Policy allowAlienPolicy = new AllowAlienPolicy(PARAM_userId, PARAM_requesterId, PARAM_requesterAccessLevel, 6);
-        final List<Policy> policies = Arrays.asList(allowAlienPolicy);
 
-        final Authorization authorizationStrategy = new Authorization(policies);
+        final Authorization authorizationStrategy = new Authorization(allowAlienPolicy);
 
         final Request request = getSampleRequest();
 
@@ -88,9 +84,8 @@ public class AuthorizationTest {
     @Test
     public void assertExceptionOnAuthorizationFailureWithDenyAllPolicy() {
         final Policy denyAllPolicy = new DenyAllPolicy();
-        final List<Policy> policies = Arrays.asList(denyAllPolicy);
 
-        final Authorization authorizationStrategy = new Authorization(policies);
+        final Authorization authorizationStrategy = new Authorization(denyAllPolicy);
 
         final Request request = getSampleRequest();
 
@@ -105,9 +100,8 @@ public class AuthorizationTest {
         final Policy selfAllowPolicy = new AllowSelfPolicy(PARAM_userId, PARAM_requesterId);
         final Policy denyAllPolicy = new DenyAllPolicy();
         final Policy firstOrSecondPolicy = new OR(Arrays.asList(selfAllowPolicy, denyAllPolicy));
-        final List<Policy> policies = Arrays.asList(firstOrSecondPolicy);
 
-        final Authorization authorizationStrategy = new Authorization(policies);
+        final Authorization authorizationStrategy = new Authorization(firstOrSecondPolicy);
 
         final Request request = getSampleRequest();
 
@@ -123,9 +117,8 @@ public class AuthorizationTest {
         final Policy selfAllowPolicy = new AllowSelfPolicy(PARAM_userId, PARAM_requesterId);
         final Policy denyAllPolicy = new DenyAllPolicy();
         final Policy firstAndSecondPolicy = new AND(Arrays.asList(selfAllowPolicy, denyAllPolicy));
-        final List<Policy> policies = Arrays.asList(firstAndSecondPolicy);
 
-        final Authorization authorizationStrategy = new Authorization(policies);
+        final Authorization authorizationStrategy = new Authorization(firstAndSecondPolicy);
 
         final Request request = getSampleRequest();
 
@@ -141,9 +134,8 @@ public class AuthorizationTest {
         final Policy denyAllPolicy = new DenyAllPolicy();
         final Policy denyAllPolicy2 = new DenyAllPolicy();
         final Policy firstOrSecondPolicy = new OR(Arrays.asList(denyAllPolicy, denyAllPolicy2));
-        final List<Policy> policies = Arrays.asList(firstOrSecondPolicy);
 
-        final Authorization authorizationStrategy = new Authorization(policies);
+        final Authorization authorizationStrategy = new Authorization(firstOrSecondPolicy);
 
         final Request request = getSampleRequest();
 
@@ -159,9 +151,8 @@ public class AuthorizationTest {
         final Policy selfAllowPolicy = new AllowSelfPolicy(PARAM_userId, PARAM_requesterId);
         final Policy selfAllowPolicy2 = new AllowSelfPolicy(PARAM_userId, PARAM_requesterId);
         final Policy firstOrSecondPolicy = new AND(Arrays.asList(selfAllowPolicy, selfAllowPolicy2));
-        final List<Policy> policies = Arrays.asList(firstOrSecondPolicy);
 
-        final Authorization authorizationStrategy = new Authorization(policies);
+        final Authorization authorizationStrategy = new Authorization(firstOrSecondPolicy);
 
         final Request request = getSampleRequest();
 

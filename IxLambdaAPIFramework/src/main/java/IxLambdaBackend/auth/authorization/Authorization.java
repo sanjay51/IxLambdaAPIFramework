@@ -7,12 +7,16 @@ import IxLambdaBackend.exception.NotAuthorizedException;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-@AllArgsConstructor
 public class Authorization extends AuthStrategy {
-    final List<Policy> policies;
+    final Policy[] policies;
+
+    public Authorization(final Policy ... policies) {
+        this.policies = policies;
+    }
 
     @Override
     public void execute(@NonNull final Map<String, Parameter> parameterMap) {
