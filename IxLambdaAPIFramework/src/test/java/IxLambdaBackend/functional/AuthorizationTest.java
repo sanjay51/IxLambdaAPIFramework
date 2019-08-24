@@ -99,7 +99,7 @@ public class AuthorizationTest {
     public void testORPolicyPositiveExample() {
         final Policy selfAllowPolicy = new AllowSelfPolicy(PARAM_userId, PARAM_requesterId);
         final Policy denyAllPolicy = new DenyAllPolicy();
-        final Policy firstOrSecondPolicy = new OR(Arrays.asList(selfAllowPolicy, denyAllPolicy));
+        final Policy firstOrSecondPolicy = OR.of(selfAllowPolicy, denyAllPolicy);
 
         final Authorization authorizationStrategy = new Authorization(firstOrSecondPolicy);
 
@@ -133,7 +133,7 @@ public class AuthorizationTest {
     public void testORPolicyNegativeExample() {
         final Policy denyAllPolicy = new DenyAllPolicy();
         final Policy denyAllPolicy2 = new DenyAllPolicy();
-        final Policy firstOrSecondPolicy = new OR(Arrays.asList(denyAllPolicy, denyAllPolicy2));
+        final Policy firstOrSecondPolicy = OR.of(denyAllPolicy, denyAllPolicy2);
 
         final Authorization authorizationStrategy = new Authorization(firstOrSecondPolicy);
 
