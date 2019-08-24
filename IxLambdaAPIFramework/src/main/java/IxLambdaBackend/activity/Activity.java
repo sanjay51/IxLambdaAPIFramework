@@ -18,8 +18,7 @@ import java.util.Map;
 public abstract class Activity {
     @Setter private Request request;
     @Setter Map<String, String> pathParameters = ImmutableMap.of();
-
-    private Map<String, Parameter> parameterMap = new HashMap<>();
+    final ParameterMap parameterMap = new ParameterMap();
 
     protected abstract Response enact() throws Exception;
     protected abstract List<Parameter> getParameters();
@@ -91,11 +90,11 @@ public abstract class Activity {
     }
 
     public String getStringParameterByName(@NonNull final String name) {
-        if (this.parameterMap.containsKey(name)) return this.parameterMap.get(name).getStringValue();
-        return null;
+        return this.getParameterByName(name).getStringValue();
     }
 
     public void addParameter(final Parameter parameter) {
         this.parameterMap.put(parameter.getName(), parameter);
     }
+
 }

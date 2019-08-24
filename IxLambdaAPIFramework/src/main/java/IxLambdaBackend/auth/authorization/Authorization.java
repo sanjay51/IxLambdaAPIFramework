@@ -1,6 +1,7 @@
 package IxLambdaBackend.auth.authorization;
 
 import IxLambdaBackend.activity.Parameter;
+import IxLambdaBackend.activity.ParameterMap;
 import IxLambdaBackend.auth.AuthStrategy;
 import IxLambdaBackend.auth.authorization.policy.Policy;
 import IxLambdaBackend.exception.NotAuthorizedException;
@@ -19,7 +20,7 @@ public class Authorization extends AuthStrategy {
     }
 
     @Override
-    public void execute(@NonNull final Map<String, Parameter> parameterMap) {
+    public void execute(@NonNull final ParameterMap parameterMap) {
         // verify all policy with OR strategy
 
         for(final Policy policy: policies) {

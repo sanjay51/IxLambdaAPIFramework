@@ -1,6 +1,7 @@
 package IxLambdaBackend.auth.authorization.policy;
 
 import IxLambdaBackend.activity.Parameter;
+import IxLambdaBackend.activity.ParameterMap;
 import lombok.AllArgsConstructor;
 
 import java.util.Map;
@@ -13,7 +14,7 @@ public class AllowAlienPolicy implements Policy {
     final int minimumAccessLevel;
 
     @Override
-    public boolean verify(final Map<String, Parameter> paramMap) {
+    public boolean verify(final ParameterMap paramMap) {
         final Parameter userId = paramMap.get(userIdAttributeName);
         final Parameter requesterId = paramMap.get(requesterIdAttributeName);
 

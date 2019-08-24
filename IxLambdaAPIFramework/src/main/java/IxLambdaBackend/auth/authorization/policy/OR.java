@@ -1,6 +1,7 @@
 package IxLambdaBackend.auth.authorization.policy;
 
 import IxLambdaBackend.activity.Parameter;
+import IxLambdaBackend.activity.ParameterMap;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
@@ -16,7 +17,7 @@ public class OR implements Policy {
     }
 
     @Override
-    public boolean verify(@NonNull final Map<String, Parameter> attributeMap) {
+    public boolean verify(@NonNull final ParameterMap attributeMap) {
         if (policies == null) return false;
 
         for (final Policy policy: this.policies) {

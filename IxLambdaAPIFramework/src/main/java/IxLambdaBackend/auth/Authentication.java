@@ -1,6 +1,7 @@
 package IxLambdaBackend.auth;
 
 import IxLambdaBackend.activity.Parameter;
+import IxLambdaBackend.activity.ParameterMap;
 import IxLambdaBackend.util.TokenUtils;
 import lombok.AllArgsConstructor;
 
@@ -13,7 +14,7 @@ public class Authentication extends AuthStrategy {
     final AuthenticationContext context;
 
     @Override
-    public void execute(final Map<String, Parameter> parameterMap) {
+    public void execute(final ParameterMap parameterMap) {
         TokenUtils.verifyToken(parameterMap.get(authTokenAttributeName).getStringValue(),
                 parameterMap.get(userIdAttributeName).getStringValue(),
                 this.context);
