@@ -7,6 +7,11 @@ import lombok.AllArgsConstructor;
 public class NumberValue extends Value<Double> {
     final double value;
 
+    @Override
+    public ValueType getType() {
+        return ValueType.NUMBER;
+    }
+
     public NumberValue(final String s) {
         this.value = Double.parseDouble(s);
     }

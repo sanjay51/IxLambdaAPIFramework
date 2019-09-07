@@ -11,6 +11,8 @@ public abstract class Value<T> {
     public abstract AttributeValue toDynamoDBAttributeValue();
     public abstract T get();
 
+    public abstract ValueType getType();
+
     public static Value fromDynamoDBAttributeValue(final AttributeValue attributeValue, final ValueType type) {
         if (attributeValue == null) return new NullValue();
 

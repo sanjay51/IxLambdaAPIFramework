@@ -12,6 +12,11 @@ public class NullValue extends Value {
     }
 
     @Override
+    public ValueType getType() {
+        return ValueType.NULL;
+    }
+
+    @Override
     public AttributeValue toDynamoDBAttributeValue() {
         return new AttributeValue().withNULL(true);
     }

@@ -8,6 +8,11 @@ public class StringValue extends Value<String> {
     final String value;
 
     @Override
+    public ValueType getType() {
+        return ValueType.STRING;
+    }
+
+    @Override
     public AttributeValue toDynamoDBAttributeValue() {
         return new AttributeValue(this.value);
     }

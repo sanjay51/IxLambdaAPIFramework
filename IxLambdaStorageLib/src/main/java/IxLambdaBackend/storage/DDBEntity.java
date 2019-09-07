@@ -212,6 +212,27 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
         return entity;
     }
 
+    public Map<String, Value> getAsMap() {
+        final Map<String, Value> entity = new HashMap<>();
+
+        // primary key
+        if (hasReadAccess(primaryKey.getName()))
+            entity.put(this.primaryKey.getName(), this.primaryKey.getValue());
+
+        // sort key
+        if (this.sortKey != null && hasReadAccess(this.sortKey.getName()))
+            entity.put(this.sortKey.getName(), this.sortKey.getValue());
+
+        for (final Map.Entry<String, Attribute> entry: this.payload.entrySet()) {
+            final Attribute attribute = entry.getValue();
+
+            if (hasReadAccess(entry.getKey()))
+                entity.put(entry.getKey(), attribute.getValue());
+        }
+
+        return entity;
+    }
+
     private boolean hasReadAccess(final String attributeName) {
         final AccessType access = this.getSchema().getAttributeTypes(attributeName).getAccess();
         return (access == READ_ONLY) || (access == READ_WRITE);
@@ -265,6 +286,10 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     public void setBooleanAttributeValue(final String attributeName, final boolean attributeValue) {
         this.setAttribute(attributeName,
                 new Attribute(attributeName, new BooleanValue(attributeValue)));
+    }
+
+    public void setStringMapAttributeValue(final String attributeName, final Map<String, String> attributeValue) {
+        this.setAttribute(attributeName, new Attribute(attributeName, new MapValue(attributeValue)));
     }
 
     public Value getAttribute(final String attributeName) {

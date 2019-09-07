@@ -8,6 +8,11 @@ public class BooleanValue extends Value<Boolean> {
     final boolean value;
 
     @Override
+    public ValueType getType() {
+        return ValueType.BOOLEAN;
+    }
+
+    @Override
     public AttributeValue toDynamoDBAttributeValue() {
         return new AttributeValue().withBOOL(value);
     }

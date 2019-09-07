@@ -11,6 +11,11 @@ public class StringSetValue extends Value<Set<String>> {
     final Set<String> value;
 
     @Override
+    public ValueType getType() {
+        return ValueType.STRING_SET;
+    }
+
+    @Override
     public AttributeValue toDynamoDBAttributeValue() {
         if (CollectionUtils.isNullOrEmpty(value))
             return new AttributeValue().withSS();
