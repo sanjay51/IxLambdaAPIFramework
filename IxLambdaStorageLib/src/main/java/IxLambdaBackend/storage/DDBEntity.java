@@ -13,6 +13,7 @@ import IxLambdaBackend.storage.schema.Schema;
 import IxLambdaBackend.storage.schema.Types;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.util.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -261,6 +262,8 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     }
 
     public void setAttributeValue(final String attributeName, final String attributeValue) {
+        if (StringUtils.isNullOrEmpty(attributeValue)) return;
+
         final ValueType valueType = schema.getAttributeTypes(attributeName).getValueType();
 
         if (valueType == ValueType.NUMBER) {
@@ -289,7 +292,7 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     }
 
     public void setStringMapAttributeValue(final String attributeName, final Map<String, String> attributeValue) {
-        this.setAttribute(attributeName, new Attribute(attributeName, new MapValue(attributeValue)));
+        this.setAttribute(attributeName, new Attribute(attributeName, MapValue.newInstanceWithStringValues(attributeValue)));
     }
 
     public Value getAttribute(final String attributeName) {

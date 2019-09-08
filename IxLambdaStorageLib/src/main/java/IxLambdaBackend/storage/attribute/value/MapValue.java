@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@AllArgsConstructor
 public class MapValue extends Value<Map<String, Value>> {
     final Map<String, Value> value;
 
@@ -17,9 +18,18 @@ public class MapValue extends Value<Map<String, Value>> {
         return ValueType.MAP;
     }
 
-    public MapValue(final Map<String, String> m) {
-        this.value = m.entrySet().stream()
+    public static MapValue newInstanceWithStringValues(final Map<String, String> m) {
+        final Map<String, Value> value = m.entrySet().stream()
                 .collect(Collectors.toMap(entry -> entry.getKey(), entry -> new StringValue(entry.getValue())));
+
+        return new MapValue(value);
+    }
+
+    public static MapValue newInstanceWithGenericValues(final Map<String, AttributeValue> m) {
+        final Map<String, Value> value = m.entrySet().stream()
+                .collect(Collectors.toMap(entry -> entry.getKey(), entry -> new StringValue(entry.getValue().getS())));
+
+        return new MapValue(value);
     }
 
     @Override
