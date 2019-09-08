@@ -41,7 +41,7 @@ public abstract class Value<T> {
                 return new NumberValue(attributeValue.getN());
 
             case BOOLEAN:
-                if (attributeValue.getB() == null) return new NullValue();
+                if (attributeValue.getBOOL() == null) return new NullValue();
                 return new BooleanValue(attributeValue.getBOOL());
 
             case STRING:
