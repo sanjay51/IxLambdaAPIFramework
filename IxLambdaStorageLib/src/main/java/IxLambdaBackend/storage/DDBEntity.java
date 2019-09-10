@@ -125,6 +125,26 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
         return (T) this;
     }
 
+    public T readByGSI(final Attribute primaryKey, final String indexName) throws Exception {
+        final Map<String, AttributeValue> response = DDBGSIReadStrategy.execute(primaryKey, null,
+                this.getSchema().getTableName(), indexName, this.getDDB());
+
+        // populate
+        populate(response);
+
+        return (T) this;
+    }
+
+    public T readByGSI(final Attribute primaryKey, final Attribute sortKey, final String indexName) throws Exception {
+        final Map<String, AttributeValue> response = DDBGSIReadStrategy.execute(primaryKey, sortKey,
+                this.getSchema().getTableName(), indexName, this.getDDB());
+
+        // populate
+        populate(response);
+
+        return (T) this;
+    }
+
     private T readByGSI() throws EntityNotFoundException, InternalException {
         // read
         final Map<String, AttributeValue> response = DDBGSIReadStrategy.execute(this.gsiPrimaryKey,
