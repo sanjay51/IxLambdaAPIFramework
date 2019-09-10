@@ -89,7 +89,7 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     public List<DDBEntity> getAllByGSI(final String gsiPrimaryKeyValue, final String indexName) throws EntityNotFoundException, InternalException {
         final Attribute attribute = new Attribute(this.getSchema().getGSIPrimaryKeyName().get(), new StringValue(gsiPrimaryKeyValue));
         final List<Map<String, AttributeValue>> rows =
-                DDBGSIReadAllStrategy.execute(attribute, this.getSchema().getTableName(), indexName, this.getDDB());
+                DDBGSIReadAllStrategy.execute(attribute, null, this.getSchema().getTableName(), indexName, this.getDDB());
 
 
         final List<DDBEntity> entities = new ArrayList<>();
@@ -154,6 +154,32 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
         populate(response);
 
         return (T) this;
+    }
+
+    public List<DDBEntity> readAllByGSI(final Attribute gsiPrimaryKey, final String indexName) throws EntityNotFoundException {
+        final List<Map<String, AttributeValue>> rows =
+                DDBGSIReadAllStrategy.execute(gsiPrimaryKey, null, this.getSchema().getTableName(), indexName, this.getDDB());
+
+        final List<DDBEntity> entities = new ArrayList<>();
+        for (Map<String, AttributeValue> row: rows) {
+            final DDBEntity entity = new GenericDDBEntity(this.getSchema(), this.getDDB(), row);
+            entities.add(entity);
+        }
+
+        return entities;
+    }
+
+    public List<DDBEntity> readAllByGSI(final Attribute gsiPrimaryKey, final Attribute gsiSortKey, final String indexName) throws EntityNotFoundException {
+        final List<Map<String, AttributeValue>> rows =
+                DDBGSIReadAllStrategy.execute(gsiPrimaryKey, gsiSortKey, this.getSchema().getTableName(), indexName, this.getDDB());
+
+        final List<DDBEntity> entities = new ArrayList<>();
+        for (Map<String, AttributeValue> row: rows) {
+            final DDBEntity entity = new GenericDDBEntity(this.getSchema(), this.getDDB(), row);
+            entities.add(entity);
+        }
+
+        return entities;
     }
 
     protected void populate(Map<String, AttributeValue> values) {

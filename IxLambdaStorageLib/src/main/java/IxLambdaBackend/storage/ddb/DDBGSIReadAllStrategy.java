@@ -15,9 +15,10 @@ import java.util.Map;
 
 public class DDBGSIReadAllStrategy {
     public static List<Map<String, AttributeValue>> execute(final Attribute primaryKey,
+                                                      final Attribute sortKey,
                                                       final String tableName,
                                                       final String indexName,
-                                                      final AmazonDynamoDB ddb) throws EntityNotFoundException, InternalException {
+                                                      final AmazonDynamoDB ddb) throws EntityNotFoundException {
 
         final Map<String, Condition> keyConditions = new HashMap<>();
 
@@ -26,17 +27,19 @@ public class DDBGSIReadAllStrategy {
                 .withAttributeValueList(new AttributeValue().withS(primaryKey.getStringValue()));
         keyConditions.put(primaryKey.getName(), primaryKeyCondition);
 
+        if (sortKey != null) {
+            final Condition sortKeyCondition = new Condition()
+                    .withComparisonOperator(ComparisonOperator.EQ)
+                    .withAttributeValueList(new AttributeValue().withS(sortKey.getStringValue()));
+            keyConditions.put(sortKey.getName(), sortKeyCondition);
+        }
+
         final QueryRequest queryRequest = new QueryRequest()
                 .withTableName(tableName)
                 .withIndexName(indexName)
                 .withKeyConditions(keyConditions);
 
-        List<Map<String, AttributeValue>> items;
-        try {
-            items = ddb.query(queryRequest).getItems();
-        } catch (Exception e) {
-            throw new InternalException(e.getMessage());
-        }
+        final List<Map<String, AttributeValue>> items = ddb.query(queryRequest).getItems();
 
         if (items.size() > 0) {
             return items;
