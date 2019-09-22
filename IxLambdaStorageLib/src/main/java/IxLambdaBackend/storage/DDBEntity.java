@@ -2,19 +2,20 @@ package IxLambdaBackend.storage;
 
 import IxLambdaBackend.storage.attribute.Attribute;
 import IxLambdaBackend.storage.attribute.value.*;
-import IxLambdaBackend.storage.schema.AccessType;
-import IxLambdaBackend.storage.schema.IndexType;
 import IxLambdaBackend.storage.ddb.*;
 import IxLambdaBackend.storage.exception.EntityAlreadyExistsException;
 import IxLambdaBackend.storage.exception.EntityNotFoundException;
 import IxLambdaBackend.storage.exception.InternalException;
 import IxLambdaBackend.storage.exception.InvalidInputException;
+import IxLambdaBackend.storage.schema.AccessType;
+import IxLambdaBackend.storage.schema.IndexType;
 import IxLambdaBackend.storage.schema.Schema;
 import IxLambdaBackend.storage.schema.Types;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
 import com.amazonaws.util.StringUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.Setter;
@@ -239,7 +240,10 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     @Override
     public Page getAllWithPagination(final String paginationHandleStr, final int pageSize) throws InternalException, EntityNotFoundException, IOException {
         Map<String, AttributeValue> paginationHandle = null;
-        if (!StringUtils.isNullOrEmpty(paginationHandleStr)) paginationHandle = ObjectMapper.readValue(paginationHandleStr, Map.class);
+        TypeReference<Map<String, AttributeValue>> typeRef = new TypeReference<Map<String, AttributeValue>>() {};
+
+        if (!StringUtils.isNullOrEmpty(paginationHandleStr))
+            paginationHandle = ObjectMapper.readValue(paginationHandleStr, typeRef);
 
         final QueryResult result =
                 DDBReadAllStrategy.execute(this.primaryKey, this.getSchema().getTableName(), this.getDDB(), paginationHandle, pageSize);
