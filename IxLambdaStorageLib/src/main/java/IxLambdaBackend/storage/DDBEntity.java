@@ -13,10 +13,13 @@ import IxLambdaBackend.storage.schema.Schema;
 import IxLambdaBackend.storage.schema.Types;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.QueryResult;
 import com.amazonaws.util.StringUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.IOException;
 import java.util.*;
 
 import static IxLambdaBackend.storage.schema.AccessType.READ_ONLY;
@@ -35,11 +38,12 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     private Schema schema;
     private AmazonDynamoDB ddb;
 
+    private static final ObjectMapper ObjectMapper = new ObjectMapper();
+
     @Setter @Getter private Map<String, Attribute> payload = new HashMap<>();
 
     public abstract Schema createSchema();
     public abstract AmazonDynamoDB createDDBClient();
-
 
     /* Constructors */
     public DDBEntity() {}
@@ -219,17 +223,36 @@ public abstract class DDBEntity <T extends DDBEntity<T>> implements Entity <T> {
     /* List operations */
     @Override
     public List<Entity> getAll() throws InternalException, EntityNotFoundException {
-        final List<Map<String, AttributeValue>> rows =
-                DDBReadAllStrategy.execute(this.primaryKey, this.getSchema().getTableName(), this.getDDB());
-
+        final QueryResult queryResult = DDBReadAllStrategy.execute(this.primaryKey, this.getSchema().getTableName(),
+                                    this.getDDB(), null, -1);
 
         final List<Entity> entities = new ArrayList<>();
-        for (Map<String, AttributeValue> row: rows) {
+        for (Map<String, AttributeValue> row: queryResult.getItems()) {
             final Entity entity = new GenericDDBEntity(this.getSchema(), this.getDDB(), row);
             entities.add(entity);
         }
 
         return entities;
+    }
+
+    /* List operations */
+    @Override
+    public Page getAllWithPagination(final String paginationHandleStr, final int pageSize) throws InternalException, EntityNotFoundException, IOException {
+        Map<String, AttributeValue> paginationHandle = null;
+        if (!StringUtils.isNullOrEmpty(paginationHandleStr)) paginationHandle = ObjectMapper.readValue(paginationHandleStr, Map.class);
+
+        final QueryResult result =
+                DDBReadAllStrategy.execute(this.primaryKey, this.getSchema().getTableName(), this.getDDB(), paginationHandle, pageSize);
+
+        final List<Entity> entities = new ArrayList<>();
+        for (Map<String, AttributeValue> row: result.getItems()) {
+            final Entity entity = new GenericDDBEntity(this.getSchema(), this.getDDB(), row);
+            entities.add(entity);
+        }
+
+        final String newPaginationHandle = ObjectMapper.writeValueAsString(result.getLastEvaluatedKey());
+
+        return new Page(entities, newPaginationHandle);
     }
 
     /* Utilities */
